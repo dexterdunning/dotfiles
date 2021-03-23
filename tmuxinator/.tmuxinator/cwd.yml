@@ -1,0 +1,6 @@
+name: cwd
+root: .
+
+windows:
+    - zsh: 
+    - nvim: nvim
