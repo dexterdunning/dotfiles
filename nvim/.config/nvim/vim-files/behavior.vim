@@ -14,6 +14,8 @@ set ignorecase
 set clipboard=unnamedplus
 set autoread
 
+syn keyword   cTodo   contained    TODO FIXME XXX
+
 " set foldmethod=syntax
 " set foldmethod=expr
 " set foldexpr=nvim_treesitter#foldexpr()
