@@ -22,11 +22,14 @@ Plug 'farmergreg/vim-lastplace'
 Plug 'unblevable/quick-scope' 
 Plug 'psliwka/vim-smoothie'
 
+" Plug 'lukas-reineke/indent-blankline.nvim', {'branch': 'lua'}
+
 " fuzzy finding 
 Plug 'nvim-lua/popup.nvim'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 Plug 'nvim-telescope/telescope-fzy-native.nvim'
+" Plug 'windwp/nvim-spectre'
 
 " icons
 Plug 'kyazdani42/nvim-web-devicons'
@@ -34,6 +37,9 @@ Plug 'ryanoasis/vim-devicons'
 
 " file navigation
 Plug 'kyazdani42/nvim-tree.lua'
+
+" language specific
+Plug 'OmniSharp/omnisharp-vim'
 
 " lsp / autocomplete
 Plug 'neovim/nvim-lspconfig'
@@ -43,17 +49,19 @@ Plug 'hrsh7th/nvim-compe'
 Plug 'hrsh7th/vim-vsnip'
 Plug 'hrsh7th/vim-vsnip-integ'
 Plug 'honza/vim-snippets'
+Plug 'ray-x/lsp_signature.nvim'
+
+" debugging
+Plug 'puremourning/vimspector'
 
 " syntax highlight
-" Plug 'nvim-treesitter/nvim-treesitter', {'branch': 'master', 'do': ':TSUpdate'}  " We recommend updating the parsers on update
-Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
-
-" language specific
-Plug 'OmniSharp/omnisharp-vim'
+Plug 'nvim-treesitter/nvim-treesitter', {'branch': 'master', 'do': ':TSUpdate'}  " We recommend updating the parsers on update
+" Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
+Plug 'sakshamgupta05/vim-todo-highlight'
 
 " status line
 Plug 'glepnir/galaxyline.nvim'
-Plug 'romgrk/barbar.nvim'
+" Plug 'romgrk/barbar.nvim'
 
 " themes
 Plug 'dracula/vim', { 'as': 'dracula' }
@@ -81,7 +89,21 @@ source $HOME/.config/nvim/plug-config/nvim-tree.vim
 
 " lua require('quickscope')
 lua require('lsp-config')
+" lua require('omnisharp-lsp')
 lua require('ts-config')
 lua require('galaxyline-config')
-lua require('barbar-config')
+" lua require('barbar-config')
 source $HOME/.config/nvim/plug-config/lsp.vim
+
+lua require'lsp_signature'.on_attach()
+
+let g:vimspector_enable_mappings = 'HUMAN'
+
+
+"nnoremap <leader>S :lua require('spectre').open()<CR>
+
+""search current word
+"vnoremap <leader>S :lua require('spectre').open_visual()<CR>
+"nnoremap <leader>Sw viw:lua require('spectre').open_visual()<CR>
+""  search in current file
+"nnoremap <leader>sp viw:lua require('spectre').open_file_search()<cr>

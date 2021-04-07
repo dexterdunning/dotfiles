@@ -18,3 +18,13 @@ set termguicolors
 " color theme
 let g:material_theme_style = 'palenight-community'
 colorscheme material
+
+
+let g:todo_highlight_config = {
+      \   'TODO': {
+      \     'gui_fg_color': '#FAFAFA',
+      \     'gui_bg_color': '#89DDFF',
+      \     'cterm_fg_color': '#FAFAFA',
+      \     'cterm_bg_color': '#89DDFF',
+      \   }
+      \ }
