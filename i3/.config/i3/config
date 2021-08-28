@@ -221,6 +221,8 @@ exec_always feh --bg-scale ~/Pictures/wallpapers/dark_5k.jpg
 
 exec_always --no-startup-id sh $HOME/.config/polybar/launch.sh
 
+exec_always xcalib /home/user/ICC/profile.icc
+
 # ~/.config/i3/config
 # Threshold max window size, depends on your display size
 #floating_maximum_size 2560 1080

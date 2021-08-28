@@ -29,7 +29,7 @@ Plug 'nvim-lua/popup.nvim'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 Plug 'nvim-telescope/telescope-fzy-native.nvim'
-" Plug 'windwp/nvim-spectre'
+Plug 'windwp/nvim-spectre'
 
 " icons
 Plug 'kyazdani42/nvim-web-devicons'
@@ -50,13 +50,18 @@ Plug 'hrsh7th/vim-vsnip'
 Plug 'hrsh7th/vim-vsnip-integ'
 Plug 'honza/vim-snippets'
 Plug 'ray-x/lsp_signature.nvim'
+Plug 'folke/lsp-trouble.nvim'
+" Plug 'simrat39/symbols-outline.nvim'
+Plug 'akinsho/flutter-tools.nvim'
 
 " debugging
 Plug 'puremourning/vimspector'
 
+Plug 'sindrets/diffview.nvim'
+
 " syntax highlight
-Plug 'nvim-treesitter/nvim-treesitter', {'branch': 'master', 'do': ':TSUpdate'}  " We recommend updating the parsers on update
-" Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
+" Plug 'nvim-treesitter/nvim-treesitter', {'branch': 'master', 'do': ':TSUpdate'}  " We recommend updating the parsers on update
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
 Plug 'sakshamgupta05/vim-todo-highlight'
 
 " status line
@@ -66,6 +71,7 @@ Plug 'glepnir/galaxyline.nvim'
 " themes
 Plug 'dracula/vim', { 'as': 'dracula' }
 Plug 'kaicataldo/material.vim', { 'branch': 'main' }
+Plug 'folke/tokyonight.nvim'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'junegunn/limelight.vim'
 
@@ -87,23 +93,25 @@ source $HOME/.config/nvim/plug-config/telescope.vim
 source $HOME/.config/nvim/plug-config/commentary.vim
 source $HOME/.config/nvim/plug-config/nvim-tree.vim
 
-" lua require('quickscope')
+lua << EOF
+vim.lsp.set_log_level("debug")
+EOF
+
 lua require('lsp-config')
-" lua require('omnisharp-lsp')
 lua require('ts-config')
 lua require('galaxyline-config')
+
+" lua require('quickscope')
+" lua require('omnisharp-lsp')
 " lua require('barbar-config')
 source $HOME/.config/nvim/plug-config/lsp.vim
 
-lua require'lsp_signature'.on_attach()
-
 let g:vimspector_enable_mappings = 'HUMAN'
 
+nnoremap <leader>S :lua require('spectre').open()<CR>
 
-"nnoremap <leader>S :lua require('spectre').open()<CR>
-
-""search current word
-"vnoremap <leader>S :lua require('spectre').open_visual()<CR>
-"nnoremap <leader>Sw viw:lua require('spectre').open_visual()<CR>
-""  search in current file
-"nnoremap <leader>sp viw:lua require('spectre').open_file_search()<cr>
+"search current word
+vnoremap <leader>S :lua require('spectre').open_visual()<CR>
+nnoremap <leader>Sw viw:lua require('spectre').open_visual()<CR>
+"  search in current file
+nnoremap <leader>sp viw:lua require('spectre').open_file_search()<cr>
