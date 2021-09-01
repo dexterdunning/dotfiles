@@ -15,10 +15,12 @@ set termguicolors
 " let g:dracular_colorterm = 0
 " colorscheme dracula
 
-" color theme
+" --- color theme ---
 let g:material_theme_style = 'palenight-community'
 colorscheme material
 
+" let g:tokyonight_style = "storm"
+" colorscheme tokyonight
 
 let g:todo_highlight_config = {
       \   'TODO': {
