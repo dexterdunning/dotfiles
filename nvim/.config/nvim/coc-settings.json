@@ -1,0 +1,9 @@
+{
+        "coc.source.OmniSharp.enable": true,
+        "coc.source.OmniSharp.triggerCharacters": ".",
+        "omnisharp.trace.server": "information",
+        "omnisharp.debug.server": true,
+        "prettier.tabWidth": 4,
+        "prettier.printWidth": 100,
+        "coc.preferences.formatOnSaveFiletypes": ["json", "markdown"]
+}

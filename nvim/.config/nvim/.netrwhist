@@ -1,0 +1,12 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhistcnt =7
+let g:netrw_dirhist_7='scp://vm59p/vmgrou15/'
+let g:netrw_dirhist_6='/home/dexter/.tmuxinator'
+let g:netrw_dirhist_5='/home/dexter/.local/share/applications/unityhub.desktop'
+let g:netrw_dirhist_4='/home/dexter/.config/i3'
+let g:netrw_dirhist_3='/home/dexter/.config/polybar/modules'
+let g:netrw_dirhist_2='/home/dexter/.tmux'
+let g:netrw_dirhist_1='/home/dexter/.config/nvim'
+let g:netrw_dirhist_0='/home/dexter/Projects/school/317/News'
+let g:netrw_dirhist_9='/home/dexter/Projects/school/317'
+let g:netrw_dirhist_8='/home/dexter/Projects/school/317/News'
