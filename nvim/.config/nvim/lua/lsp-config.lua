@@ -50,8 +50,14 @@ vim.o.completeopt = "menuone,noselect"
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 
--- local servers = { "ccls", "omnisharp", "pyls", "vimls", "dartls" }
-local servers = { "ccls", "omnisharp", "pyls", "vimls" }
+local servers
+if vim.loop.os_uname().sysname == "Linux" then
+    -- local servers = { "ccls", "omnisharp", "pyls", "vimls", "dartls" }
+    servers = { "ccls", "omnisharp", "pyls", "vimls" }
+else
+    servers = { "ccls" }
+end
+
 for _, lsp in ipairs(servers) do
     nvim_lsp[lsp].setup { 
         capabilities = capabilities;
