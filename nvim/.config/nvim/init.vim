@@ -23,6 +23,7 @@ Plug 'psliwka/vim-smoothie'
 Plug 'sindrets/diffview.nvim'
 " Plug 'lukas-reineke/indent-blankline.nvim', {'branch': 'lua'}
 Plug 'chrisbra/csv.vim'
+Plug 'GustavoKatel/todo-comments.nvim'
 
 " fuzzy finding 
 Plug 'nvim-lua/popup.nvim'
@@ -37,6 +38,7 @@ Plug 'ryanoasis/vim-devicons'
 
 " file navigation
 Plug 'kyazdani42/nvim-tree.lua'
+Plug 'GustavoKatel/sidebar.nvim'
 
 " language specific
 Plug 'OmniSharp/omnisharp-vim'
@@ -68,7 +70,8 @@ Plug 'nvim-treesitter/nvim-treesitter', {'branch': 'master', 'do': ':TSUpdate'} 
 " Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
 "
 " status line
-Plug 'glepnir/galaxyline.nvim'
+Plug 'hoob3rt/lualine.nvim'
+" Plug 'glepnir/galaxyline.nvim'
 " Plug 'romgrk/barbar.nvim'
 
 " themes
@@ -101,7 +104,10 @@ source $HOME/.config/nvim/plug-config/nvim-tree.vim
 
 lua require('lsp-config')
 lua require('ts-config')
-lua require('galaxyline-config')
+lua require('lualine-config')
+" lua require('galaxyline-config')
+lua require('sidebar-config')
+lua require('todo-config')
 
 " lua require('quickscope')
 " lua require('omnisharp-lsp')
