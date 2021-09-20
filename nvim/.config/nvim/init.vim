@@ -21,8 +21,8 @@ Plug 'farmergreg/vim-lastplace'
 Plug 'unblevable/quick-scope' 
 Plug 'psliwka/vim-smoothie'
 Plug 'sindrets/diffview.nvim'
-
 " Plug 'lukas-reineke/indent-blankline.nvim', {'branch': 'lua'}
+Plug 'chrisbra/csv.vim'
 
 " fuzzy finding 
 Plug 'nvim-lua/popup.nvim'
