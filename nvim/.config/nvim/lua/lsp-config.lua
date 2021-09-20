@@ -55,15 +55,21 @@ vim.o.completeopt = "menuone,noselect"
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 
--- local servers = { "ccls", "omnisharp", "pyls", "vimls", "dartls" }
--- local servers = { "ccls", "omnisharp", "pyls", "vimls" }
--- for _, lsp in ipairs(servers) do
---     nvim_lsp[lsp].setup { 
---         capabilities = capabilities;
---         on_attach = on_attach;
---         -- root_dir = nvim_lsp.util.root_pattern('.git');
---     }
--- end
+local servers
+if vim.loop.os_uname().sysname == "Linux" then
+    -- local servers = { "ccls", "omnisharp", "pyls", "vimls", "dartls" }
+    servers = { "ccls", "omnisharp", "pyls", "vimls" }
+else
+    servers = { "ccls" }
+end
+
+for _, lsp in ipairs(servers) do
+    nvim_lsp[lsp].setup { 
+        capabilities = capabilities;
+        on_attach = on_attach;
+        -- root_dir = nvim_lsp.util.root_pattern('.git');
+    }
+end
 
 -- flutter/dart lsp setup
 require("flutter-tools").setup {

@@ -221,7 +221,13 @@ exec_always feh --bg-scale ~/Pictures/wallpapers/dark_5k.jpg
 
 exec_always --no-startup-id sh $HOME/.config/polybar/launch.sh
 
-exec_always xcalib /home/user/ICC/profile.icc
+# color fix
+exec_always --no-startup-id /usr/lib/gnome-settings-daemon/gnome-settings-daemon
+
+# color profile
+# exec_always xcalib /home/user/ICC/profile.icc
+# exec_always xcalib ~/ICC/P32p-20_day.icc
+exec_always xcalib ~/ICC/P32p-20_daytime.icc
 
 # ~/.config/i3/config
 # Threshold max window size, depends on your display size

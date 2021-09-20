@@ -108,7 +108,7 @@ alias tmuxcwd="~/.scripts/tmux-cwd.sh"
 alias gbackup="~/.scripts/google-drive-backup.sh"
 alias qute="~/.scripts/qute.sh"
 alias zshhistoryfix="~/.scripts/zsh_history_fix.sh"
-alias backup_photos="duplicity ~/Pictures/library b2://001e283ebef18180000000002:K001s0O7poKh7SJmt4NL5mP+OyUdAjA@dectura-backup --allow-source-mismatch && touch ~/Desktop/backup.txt"
+alias backup_photos="PASSPHRASE="34erft34" duplicity ~/Pictures/library b2://001e283ebef18180000000002:K001s0O7poKh7SJmt4NL5mP+OyUdAjA@dectura-backup --allow-source-mismatch && touch ~/Desktop/backup.txt"
 
 
 # -------------------------------
