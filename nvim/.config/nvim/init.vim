@@ -55,6 +55,9 @@ Plug 'ray-x/lsp_signature.nvim'
 Plug 'windwp/nvim-autopairs'
 Plug 'folke/lsp-trouble.nvim'
 Plug 'akinsho/flutter-tools.nvim'
+Plug 'mfussenegger/nvim-jdtls'
+Plug 'jose-elias-alvarez/null-ls.nvim'
+Plug 'jose-elias-alvarez/nvim-lsp-ts-utils'
 " Plug 'simrat39/symbols-outline.nvim'
 
 " IntelliJ
@@ -100,14 +103,19 @@ source $HOME/.config/nvim/plug-config/simplenote.vim
 source $HOME/.config/nvim/plug-config/omnisharp.vim
 source $HOME/.config/nvim/plug-config/telescope.vim
 source $HOME/.config/nvim/plug-config/commentary.vim
-source $HOME/.config/nvim/plug-config/nvim-tree.vim
 
 lua require('lsp-config')
 lua require('ts-config')
 lua require('lualine-config')
-" lua require('galaxyline-config')
 lua require('sidebar-config')
 lua require('todo-config')
+lua require('diffview-config')
+lua require('nvim-tree-config')
+
+" augroup jdtls_lsp
+"     autocmd!
+"     autocmd FileType java lua require('jdtls-config').setup()
+" augroup end
 
 " lua require('quickscope')
 " lua require('omnisharp-lsp')
