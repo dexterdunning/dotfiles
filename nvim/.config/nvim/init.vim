@@ -21,7 +21,7 @@ Plug 'farmergreg/vim-lastplace'
 Plug 'unblevable/quick-scope' 
 Plug 'psliwka/vim-smoothie'
 Plug 'sindrets/diffview.nvim'
-" Plug 'lukas-reineke/indent-blankline.nvim', {'branch': 'lua'}
+Plug 'lukas-reineke/indent-blankline.nvim'
 Plug 'chrisbra/csv.vim'
 Plug 'GustavoKatel/todo-comments.nvim'
 
@@ -111,6 +111,7 @@ lua require('sidebar-config')
 lua require('todo-config')
 lua require('diffview-config')
 lua require('nvim-tree-config')
+lua require('indent-blankline-config')
 
 " augroup jdtls_lsp
 "     autocmd!
