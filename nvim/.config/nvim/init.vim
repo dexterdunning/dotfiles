@@ -56,8 +56,6 @@ Plug 'windwp/nvim-autopairs'
 Plug 'folke/lsp-trouble.nvim'
 Plug 'akinsho/flutter-tools.nvim'
 Plug 'mfussenegger/nvim-jdtls'
-Plug 'jose-elias-alvarez/null-ls.nvim'
-Plug 'jose-elias-alvarez/nvim-lsp-ts-utils'
 " Plug 'simrat39/symbols-outline.nvim'
 
 " IntelliJ
