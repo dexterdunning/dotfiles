@@ -22,7 +22,7 @@ Plug 'unblevable/quick-scope'
 Plug 'psliwka/vim-smoothie'
 Plug 'sindrets/diffview.nvim'
 Plug 'lukas-reineke/indent-blankline.nvim'
-Plug 'chrisbra/csv.vim'
+" Plug 'chrisbra/csv.vim'
 Plug 'GustavoKatel/todo-comments.nvim'
 
 " fuzzy finding 
