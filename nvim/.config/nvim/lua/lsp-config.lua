@@ -98,7 +98,7 @@ _G.lsp_organize_imports = function()
     }
     vim.lsp.buf.execute_command(params)
 end
-local on_attach = function(client, bufnr)
+local on_attach_ts = function(client, bufnr)
     local buf_map = vim.api.nvim_buf_set_keymap
     vim.cmd("command! LspDef lua vim.lsp.buf.definition()")
     vim.cmd("command! LspFormatting lua vim.lsp.buf.formatting()")
@@ -114,7 +114,7 @@ local on_attach = function(client, bufnr)
     vim.cmd(
         "command! LspDiagLine lua vim.lsp.diagnostic.show_line_diagnostics()")
     vim.cmd("command! LspSignatureHelp lua vim.lsp.buf.signature_help()")
-buf_map(bufnr, "n", "gd", ":LspDef<CR>", {silent = true})
+    buf_map(bufnr, "n", "gd", ":LspDef<CR>", {silent = true})
     buf_map(bufnr, "n", "gr", ":LspRename<CR>", {silent = true})
     buf_map(bufnr, "n", "gR", ":LspRefs<CR>", {silent = true})
     buf_map(bufnr, "n", "gy", ":LspTypeDef<CR>", {silent = true})
@@ -136,9 +136,9 @@ if client.resolved_capabilities.document_formatting then
     end
 end
 nvim_lsp.tsserver.setup {
-    on_attach = function(client)
+    on_attach_ts = function(client)
         client.resolved_capabilities.document_formatting = false
-        on_attach(client)
+        on_attach_ts(client)
     end
 }
 local filetypes = {
