@@ -1,7 +1,7 @@
 nnoremap <SPACE> <Nop>
 let mapleader = " "
 
-nmap <Tab> %
+" nmap <Tab> %
 imap jj <ESC>
 
 " window remaps
