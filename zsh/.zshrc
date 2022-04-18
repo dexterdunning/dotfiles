@@ -45,6 +45,7 @@ plugins=(
     vi-mode 
     zsh-vimode-visual 
     zsh-autosuggestions 
+    zsh-syntax-highlighting
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -69,3 +70,4 @@ export NVM_DIR="$HOME/.nvm"
 
 export PATH=$HOME/.toolbox/bin:$PATH
 
+source $HOME/.scripts/ada-cred-update.sh
