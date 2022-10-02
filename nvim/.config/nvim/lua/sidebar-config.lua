@@ -5,6 +5,6 @@ require("sidebar-nvim").setup({
     side = "left",
     initial_width = 35,
     update_interval = 1000,
-    sections = { "git-status", "lsp-diagnostics", "todos" },
+    sections = { "git", "diagnostics", "todos" },
     section_separator = "-----"
 })

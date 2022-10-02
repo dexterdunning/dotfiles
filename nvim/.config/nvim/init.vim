@@ -23,7 +23,7 @@ Plug 'psliwka/vim-smoothie'
 Plug 'sindrets/diffview.nvim'
 Plug 'lukas-reineke/indent-blankline.nvim'
 " Plug 'chrisbra/csv.vim'
-Plug 'GustavoKatel/todo-comments.nvim'
+" Plug 'GustavoKatel/todo-comments.nvim'
 
 " fuzzy finding 
 Plug 'nvim-lua/popup.nvim'
@@ -59,8 +59,8 @@ Plug 'mfussenegger/nvim-jdtls'
 " Plug 'simrat39/symbols-outline.nvim'
 
 " IntelliJ
-Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-Plug 'beeender/Comrade'
+" Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+" Plug 'beeender/Comrade'
 
 " debugging
 " Plug 'puremourning/vimspector'
@@ -106,7 +106,7 @@ lua require('lsp-config')
 lua require('ts-config')
 lua require('lualine-config')
 lua require('sidebar-config')
-lua require('todo-config')
+" lua require('todo-config')
 lua require('diffview-config')
 lua require('nvim-tree-config')
 lua require('indent-blankline-config')
