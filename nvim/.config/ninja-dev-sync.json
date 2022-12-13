@@ -1,0 +1,33 @@
+{
+  "Version": 3,
+  "DefaultHost": "dexter.aka.corp.amazon.com",
+  "DefaultWorkspaceRoot": "/workplace",
+  "LocalWorkspaceRoot": "",
+  "ShouldRespectUserSshConfig": false,
+  "RsyncFlags": [],
+  "WatchFlags": [],
+  "Exclude": [
+    "/.ninja-dev-sync-target",
+    "/*/build",
+    "*.iml",
+    ".DS_Store"
+  ],
+  "Workspaces": [
+    {
+      "LocalSync": "/Volumes/workplace/rpm_metadata/src",
+      "RemoteHost": "dexter.aka.corp.amazon.com",
+      "RemoteSync": "/workplace/rpm_metadata/src",
+      "LocalPkgInfo": "/Volumes/workplace/rpm_metadata/packageInfo",
+      "RemotePkgInfo": "/workplace/rpm_metadata/packageInfo",
+      "Exclude": []
+    },
+    {
+      "LocalSync": "/Volumes/workplace/RPMui/src",
+      "RemoteHost": "dexter.aka.corp.amazon.com",
+      "RemoteSync": "/workplace/RPMui/src",
+      "LocalPkgInfo": "/Volumes/workplace/RPMui/packageInfo",
+      "RemotePkgInfo": "/workplace/RPMui/packageInfo",
+      "Exclude": []
+    }
+  ]
+}
