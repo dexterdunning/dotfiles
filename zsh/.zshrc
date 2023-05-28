@@ -71,3 +71,4 @@ export NVM_DIR="$HOME/.nvm"
 export PATH=$HOME/.toolbox/bin:$PATH
 
 source $HOME/.scripts/ada-cred-update.sh
+export PATH="$PATH:/Users/dextedun/workplace/GitFarmCustomerScripts/env/GitFarmCustomerScripts-1.0/runtime/bin"

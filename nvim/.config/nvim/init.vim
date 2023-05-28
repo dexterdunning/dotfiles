@@ -3,6 +3,9 @@
 "   / // __ \/ / __/ | / / / __ `__ \
 " _/ // / / / / /__| |/ / / / / / / /
 "/___/_/ /_/_/\__(_)___/_/_/ /_/ /_/
+"
+
+let g:python3_host_prog = '/usr/local/bin/python3.10'
 
 call plug#begin(stdpath('data') . '/plugged')
 
@@ -111,10 +114,6 @@ lua require('diffview-config')
 lua require('nvim-tree-config')
 lua require('indent-blankline-config')
 
-" augroup jdtls_lsp
-"     autocmd!
-"     autocmd FileType java lua require('jdtls-config').setup()
-" augroup end
 
 " lua require('quickscope')
 " lua require('omnisharp-lsp')
@@ -128,3 +127,46 @@ vnoremap <leader>S :lua require('spectre').open_visual()<CR>
 nnoremap <leader>Sw viw:lua require('spectre').open_visual()<CR>
 "  search in current file
 nnoremap <leader>sp viw:lua require('spectre').open_file_search()<cr>
+
+" ================ jdtls =================
+lua << EOF
+
+jdtls_setup = function()
+    local root_dir = require('jdtls.setup').find_root({'packageInfo'}, 'Config')
+    local home = os.getenv('HOME')
+    local eclipse_workspace = home .. "/.local/share/eclipse/" .. vim.fn.fnamemodify(root_dir, ':p:h:t')
+
+    local ws_folders_lsp = {}
+    local ws_folders_jdtls = {}
+    if root_dir then
+        local file = io.open(root_dir .. "/.bemol/ws_root_folders", "r");
+        if file then
+            for line in file:lines() do
+                table.insert(ws_folders_lsp, line);
+                table.insert(ws_folders_jdtls, string.format("file://%s", line))
+            end
+            file:close()
+        end
+    end
+
+    local config = {
+        on_attach = on_attach,
+        cmd = {'java-lsp.sh', eclipse_workspace},
+        root_dir = root_dir,
+        init_options = {
+            workspaceFolders = ws_folders_jdtls,
+        },
+    }
+
+    require('jdtls').start_or_attach(config)
+
+    for _,line in ipairs(ws_folders_lsp) do
+        vim.lsp.buf.add_workspace_folder(line)
+    end
+end
+EOF
+
+augroup lsp
+    autocmd!
+    autocmd FileType java luado jdtls_setup()
+augroup end
