@@ -23,8 +23,8 @@ Plug 'simplenote-vim/simplenote.vim'
 Plug 'farmergreg/vim-lastplace'
 Plug 'unblevable/quick-scope' 
 Plug 'psliwka/vim-smoothie'
-Plug 'sindrets/diffview.nvim'
 Plug 'lukas-reineke/indent-blankline.nvim'
+" Plug 'sindrets/diffview.nvim'
 " Plug 'chrisbra/csv.vim'
 " Plug 'GustavoKatel/todo-comments.nvim'
 
@@ -59,6 +59,8 @@ Plug 'windwp/nvim-autopairs'
 Plug 'folke/lsp-trouble.nvim'
 Plug 'akinsho/flutter-tools.nvim'
 Plug 'mfussenegger/nvim-jdtls'
+Plug 'jose-elias-alvarez/null-ls.nvim'
+Plug 'MunifTanjim/prettier.nvim'
 " Plug 'simrat39/symbols-outline.nvim'
 
 " IntelliJ
@@ -104,7 +106,6 @@ source $HOME/.config/nvim/plug-config/splitjoin.vim
 source $HOME/.config/nvim/plug-config/format.vim
 source $HOME/.config/nvim/plug-config/markdown.vim
 source $HOME/.config/nvim/plug-config/simplenote.vim
-source $HOME/.config/nvim/plug-config/omnisharp.vim
 source $HOME/.config/nvim/plug-config/telescope.vim
 source $HOME/.config/nvim/plug-config/commentary.vim
 
@@ -113,13 +114,14 @@ lua require('ts-config')
 lua require('lualine-config')
 lua require('sidebar-config')
 " lua require('todo-config')
-lua require('diffview-config')
+" lua require('diffview-config')
 lua require('nvim-tree-config')
-lua require('indent-blankline-config')
+lua require('null-ls-config')
+lua require('prettier-config')
+" lua require('indent-blankline-config')
 
 
 " lua require('quickscope')
-" lua require('omnisharp-lsp')
 " lua require('barbar-config')
 source $HOME/.config/nvim/plug-config/lsp.vim
 
