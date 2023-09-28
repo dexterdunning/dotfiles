@@ -85,6 +85,9 @@ Plug 'folke/tokyonight.nvim'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'junegunn/limelight.vim'
 
+" firenvim
+Plug 'glacambre/firenvim', { 'do': { _ -> firenvim#install(0) } }
+
 call plug#end()
 
 " deoplete for intellij autocomplete
