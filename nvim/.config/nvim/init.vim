@@ -72,7 +72,7 @@ Plug 'MunifTanjim/prettier.nvim'
 
 " syntax highlight
 Plug 'sakshamgupta05/vim-todo-highlight'
-Plug 'nvim-treesitter/nvim-treesitter', {'branch': 'master', 'do': ':TSUpdate'}  " We recommend updating the parsers on update
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
 " Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
 "
 " status line
