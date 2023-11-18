@@ -8,21 +8,21 @@ require("nvim-autopairs.completion.compe").setup({
 
 local on_attach = function(client, bufnr)
     -- Set autocommands conditional on server_capabilities
-    if client.resolved_capabilities.document_highlight then
-        vim.api.nvim_exec([[
-        hi LspReferenceRead cterm=bold ctermbg=red guibg=LightYellow
-        hi LspReferenceText cterm=bold ctermbg=red guibg=LightYellow
-        hi LspReferenceWrite cterm=bold ctermbg=red guibg=LightYellow
-        augroup lsp_document_highlight
-        autocmd! * <buffer>
-        autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
-        autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
-        augroup END
-            ]], false)
-    end
+    -- if client.resolved_capabilities.document_highlight then
+    --     vim.api.nvim_exec([[
+    --     hi LspReferenceRead cterm=bold ctermbg=red guibg=LightYellow
+    --     hi LspReferenceText cterm=bold ctermbg=red guibg=LightYellow
+    --     hi LspReferenceWrite cterm=bold ctermbg=red guibg=LightYellow
+    --     augroup lsp_document_highlight
+    --     autocmd! * <buffer>
+    --     autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
+    --     autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
+    --     augroup END
+    --         ]], false)
+    -- end
     require "lsp_signature".on_attach()  -- Note: add in lsp client on-attach
 
-    client.resolved_capabilities.document_formatting = false
+    -- client.resolved_capabilities.document_formatting = false
 end
 
 require'compe'.setup {
@@ -159,20 +159,21 @@ local on_attach_ts = function(client, bufnr)
     buf_map(bufnr, "n", "<Leader>a", ":LspDiagLine<CR>", {silent = true})
     buf_map(bufnr, "i", "<C-x><C-x>", "<cmd> LspSignatureHelp<CR>",
               {silent = true})
-if client.resolved_capabilities.document_formatting then
-        vim.api.nvim_exec([[
-         augroup LspAutocommands
-             autocmd! * <buffer>
-             autocmd BufWritePost <buffer> LspFormatting
-         augroup END
-         ]], true)
-    end
+-- if client.resolved_capabilities.document_formatting then
+--         vim.api.nvim_exec([[
+--          augroup LspAutocommands
+--              autocmd! * <buffer>
+--              autocmd BufWritePost <buffer> LspFormatting
+--          augroup END
+--          ]], true)
+--     end
 end
 nvim_lsp.tsserver.setup {
-    on_attach_ts = function(client)
-        client.resolved_capabilities.document_formatting = false
-        on_attach_ts(client)
-    end
+    -- on_attach_ts = function(client)
+    --     client.resolved_capabilities.document_formatting = false
+    --     on_attach_ts(client)
+    -- end
+    on_attach_ts = on_attach_ts
 }
 local filetypes = {
     typescript = "eslint",
