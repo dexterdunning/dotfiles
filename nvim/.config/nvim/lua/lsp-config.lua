@@ -1,70 +1,96 @@
-local nvim_lsp = require('lspconfig')
+-- ------------------------------------
+-- nvim-cmp setup
+-- ------------------------------------
+local cmp = require'cmp'
 
--- nvim-compe complete autopairs
-require("nvim-autopairs.completion.compe").setup({
-    map_cr = true, --  map <CR> on insert mode
-    map_complete = true -- it will auto insert `(` after select function or method item
+cmp.setup({
+snippet = {
+  expand = function(args)
+    vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+  end,
+},
+window = {
+  -- completion = cmp.config.window.bordered(),
+  -- documentation = cmp.config.window.bordered(),
+},
+mapping = cmp.mapping.preset.insert({
+  ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+  ['<C-f>'] = cmp.mapping.scroll_docs(4),
+  ['<C-Space>'] = cmp.mapping.complete(),
+  ['<C-e>'] = cmp.mapping.abort(),
+  ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+  ["<Tab>"] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_next_item()
+      elseif luasnip.expand_or_jumpable() then
+        luasnip.expand_or_jump()
+      elseif has_words_before() then
+        cmp.complete()
+      else
+        fallback()
+      end
+  end, { "i", "s" })
+}),
+sources = cmp.config.sources({
+  { name = 'nvim_lsp' },
+  { name = 'vsnip' },
+}, {
+  { name = 'buffer' },
+})
 })
 
-local on_attach = function(client, bufnr)
-    -- Set autocommands conditional on server_capabilities
-    -- if client.resolved_capabilities.document_highlight then
-    --     vim.api.nvim_exec([[
-    --     hi LspReferenceRead cterm=bold ctermbg=red guibg=LightYellow
-    --     hi LspReferenceText cterm=bold ctermbg=red guibg=LightYellow
-    --     hi LspReferenceWrite cterm=bold ctermbg=red guibg=LightYellow
-    --     augroup lsp_document_highlight
-    --     autocmd! * <buffer>
-    --     autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
-    --     autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
-    --     augroup END
-    --         ]], false)
-    -- end
-    require "lsp_signature".on_attach()  -- Note: add in lsp client on-attach
+-- Set configuration for specific filetype.
+cmp.setup.filetype('gitcommit', {
+sources = cmp.config.sources({
+  { name = 'git' }, -- You can specify the `git` source if [you were installed it](https://github.com/petertriho/cmp-git).
+}, {
+  { name = 'buffer' },
+})
+})
 
-    -- client.resolved_capabilities.document_formatting = false
-end
-
-require'compe'.setup {
-    enabled = true;
-    autocomplete = true;
-    debug = true;
-    min_length = 1;
-    preselect = 'enable';
-    throttle_time = 80;
-    source_timeout = 200;
-    incomplete_delay = 400;
-    max_abbr_width = 100;
-    max_kind_width = 100;
-    max_menu_width = 100;
-    documentation = true;
-
-    source = {
-        path = true;
-        buffer = true;
-        calc = true;
-        vsnip = true;
-        nvim_lsp = true;
-        nvim_lua = true;
-        spell = true;
-        tags = true;
-        snippets_nvim = true;
-        treesitter = true;
-    };
+-- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
+cmp.setup.cmdline({ '/', '?' }, {
+mapping = cmp.mapping.preset.cmdline(),
+sources = {
+  { name = 'buffer' }
 }
+})
+
+-- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
+cmp.setup.cmdline(':', {
+mapping = cmp.mapping.preset.cmdline(),
+sources = cmp.config.sources({
+  { name = 'path' }
+}, {
+  { name = 'cmdline' }
+})
+})
+
+local cmp_capabilities = require('cmp_nvim_lsp').default_capabilities()
+
+-- ------------------------------------
+-- nvim-lsp setup
+-- ------------------------------------
+
+local nvim_lsp = require('lspconfig')
+
+local on_attach = function(client, bufnr)
+    require "lsp_signature".on_attach()  -- Note: add in lsp client on-attach
+end
 
 vim.o.completeopt = "menuone,noselect"
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 
-local servers
-if vim.loop.os_uname().sysname == "Linux" then
-    -- local servers = { "ccls", "omnisharp", "pyls", "vimls", "dartls" }
-    servers = { "ccls", "omnisharp", "pyls", "vimls" }
-else
-    servers = { "ccls", "tsserver" }
-end
+-- OS dependent stuff
+-- local servers
+-- if vim.loop.os_uname().sysname == "Linux" then
+--     -- local servers = { "ccls", "omnisharp", "pyls", "vimls", "dartls" }
+--     servers = { "ccls", "omnisharp", "pyls", "vimls" }
+-- end
 
+
+servers = { "ccls" }
 for _, lsp in ipairs(servers) do
     nvim_lsp[lsp].setup { 
         capabilities = capabilities;
@@ -159,21 +185,10 @@ local on_attach_ts = function(client, bufnr)
     buf_map(bufnr, "n", "<Leader>a", ":LspDiagLine<CR>", {silent = true})
     buf_map(bufnr, "i", "<C-x><C-x>", "<cmd> LspSignatureHelp<CR>",
               {silent = true})
--- if client.resolved_capabilities.document_formatting then
---         vim.api.nvim_exec([[
---          augroup LspAutocommands
---              autocmd! * <buffer>
---              autocmd BufWritePost <buffer> LspFormatting
---          augroup END
---          ]], true)
---     end
 end
 nvim_lsp.tsserver.setup {
-    -- on_attach_ts = function(client)
-    --     client.resolved_capabilities.document_formatting = false
-    --     on_attach_ts(client)
-    -- end
-    on_attach_ts = on_attach_ts
+    on_attach_ts = on_attach_ts,
+    capabilities = cmp_capabilities,
 }
 local filetypes = {
     typescript = "eslint",
@@ -217,10 +232,9 @@ nvim_lsp.diagnosticls.setup {
 }
 
 -- ------------------------------------
---
+-- flutter/dart lsp setup
 -- ------------------------------------
 
--- flutter/dart lsp setup
 require("flutter-tools").setup {
     experimental = { -- map of feature flags
         lsp_derive_paths = false, -- experimental: Attempt to find the user's flutter SDK
@@ -250,51 +264,6 @@ require("flutter-tools").setup {
         }
     }
 }
-
--- ------------------------------------
--- nvim compe tab complete
--- ------------------------------------
-local t = function(str)
-    return vim.api.nvim_replace_termcodes(str, true, true, true)
-end
-
-local check_back_space = function()
-    local col = vim.fn.col('.') - 1
-    if col == 0 or vim.fn.getline('.'):sub(col, col):match('%s') then
-        return true
-    else
-        return false
-    end
-end
-
--- Use (s-)tab to:
---- move to prev/next item in completion menuone
---- jump to prev/next snippet's placeholder
-_G.tab_complete = function()
-    if vim.fn.pumvisible() == 1 then
-        return t "<C-n>"
-    elseif vim.fn.call("vsnip#available", {1}) == 1 then
-        return t "<Plug>(vsnip-expand-or-jump)"
-    elseif check_back_space() then
-        return t "<Tab>"
-    else
-        return vim.fn['compe#complete']()
-    end
-end
-_G.s_tab_complete = function()
-    if vim.fn.pumvisible() == 1 then
-        return t "<C-p>"
-    elseif vim.fn.call("vsnip#jumpable", {-1}) == 1 then
-        return t "<Plug>(vsnip-jump-prev)"
-    else
-        return t "<S-Tab>"
-    end
-end
-
-vim.api.nvim_set_keymap("i", "<Tab>", "v:lua.tab_complete()", {expr = true})
-vim.api.nvim_set_keymap("s", "<Tab>", "v:lua.tab_complete()", {expr = true})
-vim.api.nvim_set_keymap("i", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true})
-vim.api.nvim_set_keymap("s", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true})
 
 require("trouble").setup {
 }

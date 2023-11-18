@@ -50,16 +50,24 @@ Plug 'OmniSharp/omnisharp-vim'
 Plug 'neovim/nvim-lspconfig'
 Plug 'anott03/nvim-lspinstall'
 Plug 'alexaandru/nvim-lspupdate'
-Plug 'hrsh7th/nvim-compe'
+
+Plug 'hrsh7th/cmp-nvim-lsp'
+Plug 'hrsh7th/cmp-buffer'
+Plug 'hrsh7th/cmp-path'
+Plug 'hrsh7th/cmp-cmdline'
+Plug 'hrsh7th/nvim-cmp'
+Plug 'hrsh7th/cmp-vsnip'
 Plug 'hrsh7th/vim-vsnip'
-Plug 'hrsh7th/vim-vsnip-integ'
-Plug 'honza/vim-snippets'
+
 Plug 'ray-x/lsp_signature.nvim'
+
 Plug 'windwp/nvim-autopairs'
 Plug 'folke/lsp-trouble.nvim'
+
 Plug 'akinsho/flutter-tools.nvim'
 Plug 'mfussenegger/nvim-jdtls'
 Plug 'jose-elias-alvarez/null-ls.nvim'
+
 Plug 'MunifTanjim/prettier.nvim'
 " Plug 'simrat39/symbols-outline.nvim'
 
