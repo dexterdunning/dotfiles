@@ -1,17 +1,29 @@
+local nvim_lsp = require('lspconfig')
+
 -- ------------------------------------
 -- nvim-cmp setup
 -- ------------------------------------
 local cmp = require'cmp'
+local luasnip = require'luasnip'
+
+      -- elseif luasnip.expand_or_jumpable() then
+      --   luasnip.expand_or_jump()
+
+local has_words_before = function()
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  return (vim.api.nvim_buf_get_lines(0, cursor[1] - 1, cursor[1], true)[1] or ''):sub(cursor[2], cursor[2]):match('%s') 
+end
 
 cmp.setup({
 snippet = {
   expand = function(args)
-    vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+    -- vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+    require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
   end,
 },
 window = {
   -- completion = cmp.config.window.bordered(),
-  -- documentation = cmp.config.window.bordered(),
+  -- documentation = cmp.config.window.bordered(),lspcon
 },
 mapping = cmp.mapping.preset.insert({
   ['<C-b>'] = cmp.mapping.scroll_docs(-4),
@@ -22,9 +34,7 @@ mapping = cmp.mapping.preset.insert({
   ["<Tab>"] = cmp.mapping(function(fallback)
       if cmp.visible() then
         cmp.select_next_item()
-      elseif luasnip.expand_or_jumpable() then
-        luasnip.expand_or_jump()
-      elseif has_words_before() then
+      elseif has_words_before() and luasnip.expand_or_jumpable() then
         cmp.complete()
       else
         fallback()
@@ -33,7 +43,8 @@ mapping = cmp.mapping.preset.insert({
 }),
 sources = cmp.config.sources({
   { name = 'nvim_lsp' },
-  { name = 'vsnip' },
+  { name = 'luasnip' },
+  -- { name = 'vsnip' },
 }, {
   { name = 'buffer' },
 })
@@ -69,37 +80,6 @@ sources = cmp.config.sources({
 local cmp_capabilities = require('cmp_nvim_lsp').default_capabilities()
 
 -- ------------------------------------
--- nvim-lsp setup
--- ------------------------------------
-
-local nvim_lsp = require('lspconfig')
-
-local on_attach = function(client, bufnr)
-    require "lsp_signature".on_attach()  -- Note: add in lsp client on-attach
-end
-
-vim.o.completeopt = "menuone,noselect"
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities.textDocument.completion.completionItem.snippetSupport = true
-
--- OS dependent stuff
--- local servers
--- if vim.loop.os_uname().sysname == "Linux" then
---     -- local servers = { "ccls", "omnisharp", "pyls", "vimls", "dartls" }
---     servers = { "ccls", "omnisharp", "pyls", "vimls" }
--- end
-
-
-servers = { "ccls" }
-for _, lsp in ipairs(servers) do
-    nvim_lsp[lsp].setup { 
-        capabilities = capabilities;
-        on_attach = on_attach;
-        -- root_dir = nvim_lsp.util.root_pattern('.git');
-    }
-end
-
--- ------------------------------------
 -- Python
 --
 -- https://github.com/python-lsp/python-lsp-server
@@ -113,7 +93,7 @@ local python_on_attach = function(client, bufnr)
   local bufopts = { noremap=true, silent=true, buffer=bufnr }
   vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
   vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
-  vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
+  vim.keymap.set('n', 'K', vim.lsp.buf.hover)
   vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts)
   vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, bufopts)
   vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, bufopts)
@@ -128,8 +108,49 @@ local python_on_attach = function(client, bufnr)
   vim.keymap.set('n', '<space>f', function() vim.lsp.buf.format { async = true } end, bufopts)
 end
 
-nvim_lsp.pylsp.setup{
-    on_attach = python_on_attach;
+-- nvim_lsp.pylsp.setup{
+--     on_attach = python_on_attach,
+--     capabilities = cmp_capabilities,
+-- }
+
+local pyright_opts = {
+  single_file_support = true,
+  settings = {
+    pyright = {
+      disableLanguageServices = false,
+      disableOrganizeImports = false
+    },
+    python = {
+      analysis = {
+        autoImportCompletions = true,
+        autoSearchPaths = true,
+        diagnosticMode = "workspace", -- openFilesOnly, workspace
+        typeCheckingMode = "basic", -- off, basic, strict
+        useLibraryCodeForTypes = true
+      }
+    }
+  },
+}
+
+nvim_lsp.pyright.setup{
+    on_attach = python_on_attach,
+    capabilities = cmp_capabilities,
+  single_file_support = true,
+  settings = {
+    pyright = {
+      disableLanguageServices = false,
+      disableOrganizeImports = false
+    },
+    python = {
+      analysis = {
+        autoImportCompletions = true,
+        autoSearchPaths = true,
+        diagnosticMode = "workspace", -- openFilesOnly, workspace
+        typeCheckingMode = "basic", -- off, basic, strict
+        useLibraryCodeForTypes = true
+      }
+    }
+  },
 }
 
 
@@ -281,3 +302,35 @@ require("trouble").setup {
 -- }
 
 -- require('symbols-outline').setup(opts)
+
+
+-- ------------------------------------
+-- nvim-lsp setup
+-- ------------------------------------
+
+local on_attach = function(client, bufnr)
+    require "lsp_signature".on_attach()  -- Note: add in lsp client on-attach
+end
+
+vim.o.completeopt = "menuone,noselect"
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities.textDocument.completion.completionItem.snippetSupport = true
+
+-- OS dependent stuff
+-- local servers
+-- if vim.loop.os_uname().sysname == "Linux" then
+--     -- local servers = { "ccls", "omnisharp", "pyls", "vimls", "dartls" }
+--     servers = { "ccls", "omnisharp", "pyls", "vimls" }
+-- end
+
+
+servers = { "ccls" }
+for _, lsp in ipairs(servers) do
+    nvim_lsp[lsp].setup { 
+        capabilities = capabilities;
+        on_attach = on_attach;
+        -- root_dir = nvim_lsp.util.root_pattern('.git');
+    }
+end
+
+--

@@ -58,6 +58,7 @@ Plug 'hrsh7th/cmp-cmdline'
 Plug 'hrsh7th/nvim-cmp'
 Plug 'hrsh7th/cmp-vsnip'
 Plug 'hrsh7th/vim-vsnip'
+Plug 'L3MON4D3/LuaSnip' " added this for TAB complete to work https://github.com/hrsh7th/nvim-cmp/issues/181
 
 Plug 'ray-x/lsp_signature.nvim'
 
