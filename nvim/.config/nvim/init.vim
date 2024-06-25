@@ -33,7 +33,7 @@ Plug 'nvim-lua/popup.nvim'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 Plug 'nvim-telescope/telescope-fzy-native.nvim'
-Plug 'windwp/nvim-spectre'
+" Plug 'windwp/nvim-spectre'
 
 " icons
 Plug 'kyazdani42/nvim-web-devicons'
@@ -127,6 +127,7 @@ lua require('sidebar-config')
 lua require('nvim-tree-config')
 lua require('null-ls-config')
 lua require('prettier-config')
+lua require('firenvim-config')
 " lua require('indent-blankline-config')
 
 
