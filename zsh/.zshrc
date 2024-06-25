@@ -54,6 +54,10 @@ source $ZSH/oh-my-zsh.sh
 export MANPAGER='nvim +Man!'
 alias zshconfig="nvim ~/.zshrc"
 alias bb="brazil-build"
+alias bbr="brazil-recursive-cmd --allPackages brazil-build release"
+alias gca="git commit --amend"
+alias gcan="git commit --amend --no-edit"
+alias git-pull-all="find . -type d -depth 1 -exec git --git-dir={}/.git --work-tree=$PWD/{} pull \;  "
 
 # keybinds for auto complete
 bindkey '^h'   backward-word

@@ -1,5 +1,0 @@
-[cli "bin"]
-node14x = /usr/local/Cellar/node@14/14.20.1/bin/node
-node12x = /usr/local/Cellar/node@12/12.22.12_1/bin/node
-
-node18x = /Users/dextedun/.nvm/versions/node/v18.12.1/bin/node
