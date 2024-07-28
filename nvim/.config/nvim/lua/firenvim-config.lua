@@ -2,6 +2,15 @@ vim.g.firenvim_config = {
     localSettings = {
         ["https://quip-amazon*"] = {
             takeover = "never"
+        },
+        ["*google*"] = {
+            takeover = "never"
+        },
+        ["*twitter.com*"] = {
+            takeover = "never"
+        },
+        ["*x.com*"] = {
+            takeover = "never"
         }
     }
 }
