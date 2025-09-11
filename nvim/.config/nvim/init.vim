@@ -51,15 +51,25 @@ Plug 'neovim/nvim-lspconfig'
 Plug 'anott03/nvim-lspinstall'
 Plug 'alexaandru/nvim-lspupdate'
 
+" nvim-cmp plugins
 Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/cmp-buffer'
 Plug 'hrsh7th/cmp-path'
 Plug 'hrsh7th/cmp-cmdline'
 Plug 'hrsh7th/nvim-cmp'
+
+" nvim-cmp vsnip
 Plug 'hrsh7th/cmp-vsnip'
 Plug 'hrsh7th/vim-vsnip'
-Plug 'L3MON4D3/LuaSnip' " added this for TAB complete to work https://github.com/hrsh7th/nvim-cmp/issues/181
 
+" more snippets for javascript
+Plug 'rafamadriz/friendly-snippets'
+
+" nvim-cmp luasnip
+" Plug 'L3MON4D3/LuaSnip' " added this for TAB complete to work https://github.com/hrsh7th/nvim-cmp/issues/181
+" Plug 'saadparwaiz1/cmp_luasnip'
+
+" function signature for lsp completion
 Plug 'ray-x/lsp_signature.nvim'
 
 Plug 'windwp/nvim-autopairs'

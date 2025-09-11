@@ -17,3 +17,8 @@ nnoremap <leader>gb <cmd>lua require('telescope.builtin').git_branches()<cr>
 
 " telescope custom
 nnoremap <leader>cfg <cmd>lua require('telescope-config').search_dotfiles()<cr>
+
+" show diagnostics
+nnoremap <leader>xx <cmd>Telescope diagnostics<cr>
+nnoremap <leader>xw <cmd>Telescope diagnostics bufnr=0<cr>
+nnoremap <leader>xl <cmd>Telescope lsp_document_diagnostics<cr>
