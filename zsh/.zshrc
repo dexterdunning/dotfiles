@@ -76,7 +76,7 @@ export NVM_DIR="$HOME/.nvm"
 export PATH=$HOME/.toolbox/bin:$PATH
 
 source $HOME/.scripts/ada-cred-update.sh
-export PATH="$PATH:/Users/dextedun/workplace/GitFarmCustomerScripts/env/GitFarmCustomerScripts-1.0/runtime/bin"
 
 # Created by `pipx` on 2024-06-22 15:47:20
-export PATH="$PATH:/Users/dexterdunning/.local/bin"
+export PATH="$PATH:$HOME/.local/bin"
+eval "$(pyenv init -)"

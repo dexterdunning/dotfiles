@@ -117,25 +117,87 @@ install_package_managers() {
     fi
 }
 
-# Install Neovim
-install_neovim() {
-    log_info "Installing Neovim..."
+# Install build dependencies for Neovim
+install_neovim_build_deps() {
+    log_info "Installing Neovim build dependencies..."
     
     if [[ "$OS" == "macos" ]]; then
-        brew install neovim
+        # Install build dependencies via Homebrew
+        brew install ninja cmake gettext curl
     elif [[ "$OS" == "linux" ]]; then
         if command_exists apt; then
-            sudo apt install -y neovim
+            sudo apt install -y ninja-build gettext cmake unzip curl build-essential
         elif command_exists yum; then
-            sudo yum install -y neovim
+            sudo yum install -y ninja-build gettext cmake unzip curl gcc gcc-c++ make
         elif command_exists dnf; then
-            sudo dnf install -y neovim
+            sudo dnf install -y ninja-build gettext cmake unzip curl gcc gcc-c++ make
         elif command_exists pacman; then
-            sudo pacman -S --noconfirm neovim
+            sudo pacman -S --noconfirm base-devel cmake unzip ninja curl gettext
         fi
     fi
     
-    log_success "Neovim installed"
+    log_success "Build dependencies installed"
+}
+
+# Install Neovim from GitHub source
+install_neovim() {
+    log_info "Installing Neovim from GitHub source..."
+    
+    # Create build directory
+    mkdir -p ~/build-from-source
+    cd ~/build-from-source
+    
+    # Check if neovim directory already exists
+    if [[ -d "neovim" ]]; then
+        log_info "Neovim source directory exists, updating..."
+        cd neovim
+        git fetch --all
+        git reset --hard origin/master
+        git clean -fd
+    else
+        log_info "Cloning Neovim from GitHub..."
+        git clone https://github.com/neovim/neovim.git
+        cd neovim
+    fi
+    
+    # Checkout the latest stable release or master
+    log_info "Checking out latest stable release..."
+    LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1) 2>/dev/null || echo "master")
+    if [[ "$LATEST_TAG" != "master" ]]; then
+        git checkout "$LATEST_TAG"
+        log_info "Building Neovim $LATEST_TAG"
+    else
+        log_info "Building Neovim from master branch"
+    fi
+    
+    # Clean previous build
+    make distclean 2>/dev/null || true
+    
+    # Build Neovim
+    log_info "Building Neovim (this may take a few minutes)..."
+    make CMAKE_BUILD_TYPE=Release
+    
+    # Install Neovim
+    log_info "Installing Neovim..."
+    if [[ "$OS" == "macos" ]]; then
+        # Install to /usr/local for macOS
+        sudo make install
+    elif [[ "$OS" == "linux" ]]; then
+        # Install to /usr/local for Linux
+        sudo make install
+    fi
+    
+    # Return to original directory
+    cd - > /dev/null
+    
+    # Verify installation
+    if command_exists nvim; then
+        local nvim_version=$(nvim --version | head -n1)
+        log_success "Neovim installed: $nvim_version"
+    else
+        log_error "Neovim installation failed"
+        exit 1
+    fi
 }
 
 # Install pyenv
@@ -322,7 +384,6 @@ install_python_lsp() {
     # Install additional Python tools mentioned in your config
     python -m pip install --user \
         python-lsp-black \
-        python-lsp-mypy \
         python-lsp-isort \
         python-lsp-ruff \
         pylsp-mypy \
@@ -662,7 +723,7 @@ main() {
     ask_optional_components
     
     log_info "This script will install:"
-    echo "  • Neovim (latest)"
+    echo "  • Neovim (built from GitHub source)"
     echo "  • pyenv & Python $PYTHON_VERSION"
     echo "  • nvm & Node.js $NODE_VERSION"
     if [[ "$INSTALL_JAVA" == true ]]; then
@@ -687,6 +748,7 @@ main() {
     # Run installation steps
     install_package_managers
     install_essential_tools
+    install_neovim_build_deps
     install_neovim
     
     # Version managers and languages
@@ -728,6 +790,7 @@ main() {
     echo "2. If you haven't already, copy your Neovim config to ~/.config/nvim/"
     echo "3. Open Neovim and run ':PlugInstall' to install plugins"
     echo "4. Run ':checkhealth' in Neovim to verify everything is working"
+    echo "5. Neovim source code is available in ~/build-from-source/neovim for future updates"
     if [[ "$INSTALL_JAVA" == true ]]; then
         echo "5. For Java development, download JDTLS to ~/.local/share/eclipse/jdtls"
         echo "   from: https://download.eclipse.org/jdtls/snapshots/?d"
