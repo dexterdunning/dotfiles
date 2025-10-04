@@ -4,7 +4,7 @@ require("sidebar-nvim").setup({
     open = false,
     side = "left",
     initial_width = 35,
-    update_interval = 1000,
-    sections = { "git", "diagnostics", "todos" },
+    update_interval = 5000, -- Increased from 1000ms to 5000ms for large projects
+    sections = { "diagnostics" }, -- Removed "git", "todos" which are expensive in large repos
     section_separator = "-----"
 })

@@ -32,7 +32,8 @@ Plug 'lukas-reineke/indent-blankline.nvim'
 Plug 'nvim-lua/popup.nvim'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
-Plug 'nvim-telescope/telescope-fzy-native.nvim'
+Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
+Plug 'nvim-telescope/telescope-live-grep-args.nvim'
 " Plug 'windwp/nvim-spectre'
 
 " icons
@@ -75,16 +76,19 @@ Plug 'ray-x/lsp_signature.nvim'
 Plug 'windwp/nvim-autopairs'
 Plug 'folke/lsp-trouble.nvim'
 
+" AI / Cursor integration
+" Plug 'yetone/avante.nvim', { 'branch': 'main', 'do': 'make' }
+" Plug 'MunifTanjim/nui.nvim'  " Required dependency for avante.nvim
+" Plug 'MeanderingProgrammer/render-markdown.nvim'  " Required for avante.nvim
+" Plug 'HakonHarnes/img-clip.nvim'  " Optional: for image pasting
+Plug 'xTacobaco/cursor-agent.nvim'
+
 Plug 'akinsho/flutter-tools.nvim'
 Plug 'mfussenegger/nvim-jdtls'
 Plug 'jose-elias-alvarez/null-ls.nvim'
 
 Plug 'MunifTanjim/prettier.nvim'
 " Plug 'simrat39/symbols-outline.nvim'
-
-" IntelliJ
-" Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-" Plug 'beeender/Comrade'
 
 " debugging
 " Plug 'puremourning/vimspector'
@@ -140,6 +144,9 @@ lua require('prettier-config')
 lua require('firenvim-config')
 " lua require('indent-blankline-config')
 
+" lua require('avante-config')
+lua require('cursor-agent-config')
+
 
 " lua require('quickscope')
 " lua require('barbar-config')
@@ -150,6 +157,7 @@ nnoremap <leader>S :lua require('spectre').open()<CR>
 "search current word
 vnoremap <leader>S :lua require('spectre').open_visual()<CR>
 nnoremap <leader>Sw viw:lua require('spectre').open_visual()<CR>
+
 "  search in current file
 nnoremap <leader>sp viw:lua require('spectre').open_file_search()<cr>
 

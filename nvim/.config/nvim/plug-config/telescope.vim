@@ -18,6 +18,18 @@ nnoremap <leader>gb <cmd>lua require('telescope.builtin').git_branches()<cr>
 " telescope custom
 nnoremap <leader>cfg <cmd>lua require('telescope-config').search_dotfiles()<cr>
 
+" Rippling-specific optimized commands
+nnoremap <leader>fa <cmd>lua require('telescope-config').find_app_files()<cr>
+nnoremap <leader>fp <cmd>lua require('telescope-config').find_python_files()<cr>
+nnoremap <leader>fj <cmd>lua require('telescope-config').find_js_files()<cr>
+nnoremap <leader>sa <cmd>lua require('telescope-config').search_in_app()<cr>
+nnoremap <leader>fc <cmd>lua require('telescope-config').search_configs()<cr>
+nnoremap <leader>ft <cmd>lua require('telescope-config').search_tests()<cr>
+nnoremap <leader>fr <cmd>lua require('telescope-config').search_recent_files()<cr>
+
+" Enhanced live grep with args
+nnoremap <leader>la <cmd>lua require('telescope').extensions.live_grep_args.live_grep_args()<cr>
+
 " show diagnostics
 nnoremap <leader>xx <cmd>Telescope diagnostics<cr>
 nnoremap <leader>xw <cmd>Telescope diagnostics bufnr=0<cr>
