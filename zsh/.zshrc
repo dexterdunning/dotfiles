@@ -1,61 +1,13 @@
-# If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:/usr/local/bin:$PATH
-
 export EDITOR='nvim'
 
-# Path to your oh-my-zsh installation.
-# export ZSH="/Users/dextedun/.oh-my-zsh"
 export ZSH="$HOME/.oh-my-zsh"
 
-# Set name of the theme to load --- if set to "random", it will
-# load a random theme each time oh-my-zsh is loaded, in which case,
-# to know which specific one was loaded, run: echo $RANDOM_THEME
-# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="robbyrussell"
-
-# terminal colors
-export TERM="xterm-256color"
-
-# Set list of themes to pick from when loading at random
-# Setting this variable when ZSH_THEME=random will cause zsh to load
-# a theme from this variable instead of looking in $ZSH/themes/
-# If set to an empty array, this variable will have no effect.
-# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
-
-# Uncomment the following line if pasting URLs and other text is messed up.
-DISABLE_MAGIC_FUNCTIONS="true"
-
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
-
-# Uncomment the following line to enable command auto-correction.
-ENABLE_CORRECTION="true"
-
-# Uncomment the following line to display red dots whilst waiting for completion.
-# Caution: this setting can cause issues with multiline prompts (zsh 5.7.1 and newer seem to work)
-# See https://github.com/ohmyzsh/ohmyzsh/issues/5765
-COMPLETION_WAITING_DOTS="true"
-
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-DISABLE_UNTRACKED_FILES_DIRTY="true"
-
-plugins=(
-    git 
-    vi-mode 
-    zsh-vimode-visual 
-    zsh-autosuggestions 
-    zsh-syntax-highlighting
-)
-
-source $ZSH/oh-my-zsh.sh
-
-
+# use vim when opening man pages
 export MANPAGER='nvim +Man!'
-alias zshconfig="nvim ~/.zshrc"
-alias bb="brazil-build"
-alias bbr="brazil-recursive-cmd --allPackages brazil-build release"
+
+# General Alias
+alias zshco="nvim ~/.zshrc"
+alias zshso="source ~/.zshrc"
 alias gca="git commit --amend"
 alias gcan="git commit --amend --no-edit"
 alias git-pull-all="find . -type d -depth 1 -exec git --git-dir={}/.git --work-tree=$PWD/{} pull \;  "
@@ -75,8 +27,17 @@ export NVM_DIR="$HOME/.nvm"
 
 export PATH=$HOME/.toolbox/bin:$PATH
 
-source $HOME/.scripts/ada-cred-update.sh
-
 # Created by `pipx` on 2024-06-22 15:47:20
 export PATH="$PATH:$HOME/.local/bin"
 eval "$(pyenv init -)"
+
+# CDE CLI zsh configuration
+source /Users/dexter/.cde/.venv/lib/python3.11/site-packages/cde_cli/cde_cli_sh_rc.sh
+
+# Rippling Dev-Env Vars
+export DEVELOPER_NAME="dexterdunning"
+export CDE_SLIM_INIT_ENABLED=true
+
+# Rippling Alias
+alias lde="cde local"
+export AWS_PROFILE=devexp-playground-claude
