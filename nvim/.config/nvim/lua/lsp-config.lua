@@ -1,6 +1,23 @@
 -- from warp ai
 local cmp = require("cmp")
 
+-- Helper function to go to definition in a new tab
+local function go_to_definition_new_tab()
+	-- Save current position
+	local current_buf = vim.api.nvim_get_current_buf()
+	local current_pos = vim.api.nvim_win_get_cursor(0)
+	
+	-- Open new tab
+	vim.cmd('tabnew')
+	
+	-- Set the buffer in new tab
+	vim.api.nvim_set_current_buf(current_buf)
+	vim.api.nvim_win_set_cursor(0, current_pos)
+	
+	-- Go to definition
+	vim.lsp.buf.definition()
+end
+
 -- diagnostic setup
 vim.diagnostic.config({
 	virtual_text = true, -- Show errors inline
@@ -223,6 +240,7 @@ vim.lsp.config('pylsp', {
 
 		local opts = { noremap = true, silent = true, buffer = bufnr }
 		vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+		vim.keymap.set("n", "<leader>gtd", go_to_definition_new_tab, opts)
 		vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
 		vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
 		vim.keymap.set("n", "<C-k>", vim.lsp.buf.signature_help, opts)
@@ -313,6 +331,7 @@ vim.lsp.config('ts_ls', {
 
 		local opts = { noremap = true, silent = true, buffer = bufnr }
 		vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+		vim.keymap.set("n", "<leader>gtd", go_to_definition_new_tab, opts)
 		vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
 		vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
 		vim.keymap.set("n", "<C-k>", vim.lsp.buf.signature_help, opts)
@@ -380,6 +399,7 @@ vim.lsp.config('lua_ls', {
 
 		local opts = { noremap = true, silent = true, buffer = bufnr }
 		vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+		vim.keymap.set("n", "<leader>gtd", go_to_definition_new_tab, opts)
 		vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
 		vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
 		vim.keymap.set("n", "<C-k>", vim.lsp.buf.signature_help, opts)
@@ -426,6 +446,7 @@ for _, lsp in ipairs(servers) do
 
 			local opts = { noremap = true, silent = true, buffer = bufnr }
 			vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+			vim.keymap.set("n", "<leader>gtd", go_to_definition_new_tab, opts)
 			vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
 			vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
 			vim.keymap.set("n", "<C-k>", vim.lsp.buf.signature_help, opts)

@@ -1,5 +1,5 @@
 local actions = require('telescope.actions')
-local trouble = require('trouble.providers.telescope')
+local trouble = require('trouble.sources.telescope')
 
 -- Performance optimizations for large repositories
 require('telescope').setup {
@@ -103,13 +103,13 @@ require('telescope').setup {
                 ["<C-x>"] = false,
                 ["<C-q>"] = actions.send_to_qflist + actions.open_qflist,
                 ["<M-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
-                ["<C-t>"] = trouble.open_with_trouble,
+                ["<C-t>"] = trouble.open,
                 ["<C-h>"] = "which_key",
                 ["<esc>"] = actions.close,
                 ["<C-u>"] = false, -- Clear prompt
             },
             n = {
-                ["<C-t>"] = trouble.open_with_trouble,
+                ["<C-t>"] = trouble.open,
                 ["<C-q>"] = actions.send_to_qflist + actions.open_qflist,
                 ["<M-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
             },

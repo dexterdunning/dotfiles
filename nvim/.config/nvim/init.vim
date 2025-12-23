@@ -16,6 +16,7 @@ Plug 'lifepillar/vim-cheat40'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-fugitive'
+Plug 'airblade/vim-gitgutter'
 Plug 'tpope/vim-commentary'
 Plug 'drzel/vim-scroll-in-place'
 Plug 'AndrewRadev/splitjoin.vim'
@@ -26,7 +27,7 @@ Plug 'psliwka/vim-smoothie'
 Plug 'lukas-reineke/indent-blankline.nvim'
 " Plug 'sindrets/diffview.nvim'
 " Plug 'chrisbra/csv.vim'
-" Plug 'GustavoKatel/todo-comments.nvim'
+Plug 'folke/todo-comments.nvim'
 
 " fuzzy finding 
 Plug 'nvim-lua/popup.nvim'
@@ -66,26 +67,19 @@ Plug 'hrsh7th/vim-vsnip'
 " more snippets for javascript
 Plug 'rafamadriz/friendly-snippets'
 
-" nvim-cmp luasnip
-" Plug 'L3MON4D3/LuaSnip' " added this for TAB complete to work https://github.com/hrsh7th/nvim-cmp/issues/181
-" Plug 'saadparwaiz1/cmp_luasnip'
-
 " function signature for lsp completion
 Plug 'ray-x/lsp_signature.nvim'
 
 Plug 'windwp/nvim-autopairs'
 Plug 'folke/lsp-trouble.nvim'
 
-" AI / Cursor integration
-" Plug 'yetone/avante.nvim', { 'branch': 'main', 'do': 'make' }
-" Plug 'MunifTanjim/nui.nvim'  " Required dependency for avante.nvim
-" Plug 'MeanderingProgrammer/render-markdown.nvim'  " Required for avante.nvim
-" Plug 'HakonHarnes/img-clip.nvim'  " Optional: for image pasting
-Plug 'xTacobaco/cursor-agent.nvim'
+" AI / Claude Code integration
+Plug 'folke/snacks.nvim'
+Plug 'coder/claudecode.nvim'
 
 Plug 'akinsho/flutter-tools.nvim'
 Plug 'mfussenegger/nvim-jdtls'
-Plug 'jose-elias-alvarez/null-ls.nvim'
+Plug 'nvimtools/none-ls.nvim'
 
 Plug 'MunifTanjim/prettier.nvim'
 " Plug 'simrat39/symbols-outline.nvim'
@@ -94,7 +88,7 @@ Plug 'MunifTanjim/prettier.nvim'
 " Plug 'puremourning/vimspector'
 
 " syntax highlight
-Plug 'sakshamgupta05/vim-todo-highlight'
+" Plug 'sakshamgupta05/vim-todo-highlight'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
 " Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
 "
@@ -136,7 +130,7 @@ lua require('lsp-config')
 lua require('ts-config')
 lua require('lualine-config')
 lua require('sidebar-config')
-" lua require('todo-config')
+lua require('todo-config')
 " lua require('diffview-config')
 lua require('nvim-tree-config')
 lua require('null-ls-config')
@@ -144,8 +138,7 @@ lua require('prettier-config')
 lua require('firenvim-config')
 " lua require('indent-blankline-config')
 
-" lua require('avante-config')
-lua require('cursor-agent-config')
+lua require('claudecode-config')
 
 
 " lua require('quickscope')
