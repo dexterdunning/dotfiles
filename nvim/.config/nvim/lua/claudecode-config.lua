@@ -1,7 +1,7 @@
 -- claudecode.nvim configuration
 require("claudecode").setup({
 	-- Use your custom cde claude command
-	terminal_cmd = "/Users/dexter/.cde/.venv/bin/cde claude",
+	terminal_cmd = "claude",
 
 	-- Window configuration
 	window = {

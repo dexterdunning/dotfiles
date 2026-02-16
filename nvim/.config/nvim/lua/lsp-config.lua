@@ -39,6 +39,11 @@ vim.diagnostic.config({
 vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Open diagnostic float" })
 vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to previous diagnostic" })
 vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Go to next diagnostic" })
+vim.keymap.set("n", "<leader>lq", vim.diagnostic.setloclist, { desc = "Open diagnostic list" })
+
+-- LSP debugging commands
+vim.keymap.set("n", "<leader>li", "<cmd>LspInfo<cr>", { desc = "LSP Info" })
+vim.keymap.set("n", "<leader>lr", "<cmd>LspRestart<cr>", { desc = "LSP Restart" })
 
 -- Configure nvim-cmp with better sorting for function signatures
 cmp.setup({
@@ -275,6 +280,9 @@ vim.lsp.enable('pylsp')
 
 -- TypScript/JavaScript Language Server
 vim.lsp.config('ts_ls', {
+	cmd = { 'typescript-language-server', '--stdio' },
+	filetypes = { 'javascript', 'javascriptreact', 'javascript.jsx', 'typescript', 'typescriptreact', 'typescript.tsx' },
+	root_markers = { 'package.json', 'tsconfig.json', 'jsconfig.json', '.git' },
 	capabilities = capabilities,
 	init_options = {
 		preferences = {
