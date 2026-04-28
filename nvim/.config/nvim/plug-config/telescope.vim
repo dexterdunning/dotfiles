@@ -1,5 +1,3 @@
-lua require("telescope-config")
-
 " telescope remaps
 nnoremap <leader>tt <cmd>Telescope<cr>
 nnoremap <leader>ff <cmd>lua require('telescope.builtin').find_files()<cr>

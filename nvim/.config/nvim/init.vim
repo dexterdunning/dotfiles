@@ -19,9 +19,7 @@ Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-rhubarb'
 Plug 'airblade/vim-gitgutter'
 Plug 'tpope/vim-commentary'
-Plug 'drzel/vim-scroll-in-place'
 Plug 'AndrewRadev/splitjoin.vim'
-Plug 'simplenote-vim/simplenote.vim'
 Plug 'farmergreg/vim-lastplace'
 Plug 'unblevable/quick-scope' 
 Plug 'psliwka/vim-smoothie'
@@ -29,9 +27,10 @@ Plug 'lukas-reineke/indent-blankline.nvim'
 " Plug 'sindrets/diffview.nvim'
 " Plug 'chrisbra/csv.vim'
 Plug 'folke/todo-comments.nvim'
+Plug 'MeanderingProgrammer/render-markdown.nvim'
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown'] }
 
 " fuzzy finding 
-Plug 'nvim-lua/popup.nvim'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
@@ -51,8 +50,6 @@ Plug 'OmniSharp/omnisharp-vim'
 
 " lsp / autocomplete
 Plug 'neovim/nvim-lspconfig'
-Plug 'anott03/nvim-lspinstall'
-Plug 'alexaandru/nvim-lspupdate'
 
 " nvim-cmp plugins
 Plug 'hrsh7th/cmp-nvim-lsp'
@@ -102,16 +99,12 @@ Plug 'hoob3rt/lualine.nvim'
 Plug 'dracula/vim', { 'as': 'dracula' }
 Plug 'kaicataldo/material.vim', { 'branch': 'main' }
 Plug 'folke/tokyonight.nvim'
-Plug 'vim-airline/vim-airline-themes'
 Plug 'junegunn/limelight.vim'
 
 " firenvim
 Plug 'glacambre/firenvim', { 'do': { _ -> firenvim#install(0) } }
 
 call plug#end()
-
-" deoplete for intellij autocomplete
-let g:deoplete#enable_at_startup = 1
 
 source $HOME/.config/nvim/vim-files/behavior.vim
 source $HOME/.config/nvim/vim-files/remaps.vim
@@ -123,37 +116,33 @@ source $HOME/.config/nvim/plug-config/python-syntax.vim
 source $HOME/.config/nvim/plug-config/splitjoin.vim
 source $HOME/.config/nvim/plug-config/format.vim
 source $HOME/.config/nvim/plug-config/markdown.vim
-source $HOME/.config/nvim/plug-config/simplenote.vim
 source $HOME/.config/nvim/plug-config/telescope.vim
 source $HOME/.config/nvim/plug-config/commentary.vim
 
+" Load immediately: LSP, treesitter, UI chrome, render
 lua require('lsp-config')
 lua require('ts-config')
 lua require('lualine-config')
-lua require('sidebar-config')
-lua require('todo-config')
-" lua require('diffview-config')
-lua require('nvim-tree-config')
-lua require('null-ls-config')
-lua require('prettier-config')
 lua require('firenvim-config')
-" lua require('indent-blankline-config')
+lua require('render-markdown').setup()
 
-lua require('claudecode-config')
+" Defer heavy plugins — load after startup, before first keypress
+lua << EOF
+vim.defer_fn(function()
+  require('telescope-config')
+  require('nvim-tree-config')
+  require('null-ls-config')
+  require('prettier-config')
+  require('claudecode-config')
+  require('sidebar-config')
+  require('todo-config')
+end, 0)
+EOF
 
 
 " lua require('quickscope')
 " lua require('barbar-config')
 source $HOME/.config/nvim/plug-config/lsp.vim
-
-nnoremap <leader>S :lua require('spectre').open()<CR>
-
-"search current word
-vnoremap <leader>S :lua require('spectre').open_visual()<CR>
-nnoremap <leader>Sw viw:lua require('spectre').open_visual()<CR>
-
-"  search in current file
-nnoremap <leader>sp viw:lua require('spectre').open_file_search()<cr>
 
 " ================ jdtls =================
 lua << EOF
