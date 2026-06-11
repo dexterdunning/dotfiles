@@ -68,6 +68,9 @@ Plug 'rafamadriz/friendly-snippets'
 " function signature for lsp completion
 Plug 'ray-x/lsp_signature.nvim'
 
+" LSP progress UI (corner notifications for indexing, requests, etc.)
+Plug 'j-hui/fidget.nvim'
+
 Plug 'windwp/nvim-autopairs'
 Plug 'folke/lsp-trouble.nvim'
 
@@ -126,6 +129,10 @@ lua require('lualine-config')
 lua require('firenvim-config')
 lua require('render-markdown').setup()
 
+" Pinned subproject paths to always warm on startup (lsp-eager.lua).
+" Substring match against tsconfig.json directory paths.
+let g:nvim_lsp_warmup_pinned_paths = ['timeTracking']
+
 " Defer heavy plugins — load after startup, before first keypress
 lua << EOF
 vim.defer_fn(function()
@@ -136,6 +143,9 @@ vim.defer_fn(function()
   require('claudecode-config')
   require('sidebar-config')
   require('todo-config')
+  require('workspace-symbols').setup_keymaps()
+  require('fidget').setup({})
+  require('lsp-eager').setup()
 end, 0)
 EOF
 

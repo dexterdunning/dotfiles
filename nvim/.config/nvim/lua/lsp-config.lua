@@ -278,47 +278,50 @@ vim.lsp.config('pylsp', {
 })
 vim.lsp.enable('pylsp')
 
--- TypScript/JavaScript Language Server
-vim.lsp.config('ts_ls', {
-	cmd = { 'typescript-language-server', '--stdio' },
-	filetypes = { 'javascript', 'javascriptreact', 'javascript.jsx', 'typescript', 'typescriptreact', 'typescript.tsx' },
-	root_markers = { 'package.json', 'tsconfig.json', 'jsconfig.json', '.git' },
+-- ty: Astral's typed Python LSP. Provides workspace/symbol for fast symbol search.
+-- Runs alongside pylsp; pylsp owns completion/hover, ty owns workspace symbols + type diagnostics.
+vim.lsp.config('ty', {
+	cmd = { 'ty', 'server' },
+	filetypes = { 'python' },
+	root_markers = { 'pyproject.toml', 'setup.py', 'setup.cfg', 'requirements.txt', '.git' },
 	capabilities = capabilities,
-	init_options = {
-		preferences = {
-			includeCompletionsForModuleExports = true,
-			includeCompletionsWithInsertText = true,
-		},
-	},
+	on_attach = function(client, bufnr)
+		-- Warm the workspace symbol index so the first search is fast.
+		vim.lsp.buf_request(bufnr, 'workspace/symbol', { query = '' }, function() end)
+	end,
+})
+vim.lsp.enable('ty')
+
+-- vtsls: TypeScript/JavaScript LSP. Replaces typescript-language-server.
+-- Built directly on tsserver — better feature parity with VSCode and faster on monorepos.
+-- For rippling-webapp scale, bumps tsserver memory to 8GB.
+vim.lsp.config('vtsls', {
+	cmd = { 'vtsls', '--stdio' },
+	filetypes = { 'javascript', 'javascriptreact', 'javascript.jsx', 'typescript', 'typescriptreact', 'typescript.tsx' },
+	-- Prefer tsconfig.json (project root) over package.json (subpackage).
+	-- .git as final fallback for monorepo root.
+	root_markers = { 'tsconfig.json', 'jsconfig.json', 'package.json', '.git' },
+	capabilities = capabilities,
 	settings = {
-		typescript = {
-			inlayHints = {
-				includeInlayParameterNameHints = "all",
-				includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-				includeInlayFunctionParameterTypeHints = true,
-				includeInlayVariableTypeHints = false, -- Reduce noise
-				includeInlayPropertyDeclarationTypeHints = true,
-				includeInlayFunctionLikeReturnTypeHints = false, -- Reduce noise
-				includeInlayEnumMemberValueHints = true,
-			},
-			suggest = {
-				includeCompletionsForModuleExports = true,
-				includeCompletionsWithInsertText = true,
-			},
-			preferences = {
-				includeCompletionsWithSnippetText = true, -- Key for parameter completion
-				includeCompletionsForImportStatements = true,
+		vtsls = {
+			experimental = {
+				completion = {
+					enableServerSideFuzzyMatch = true,
+				},
 			},
 		},
-		javascript = {
+		typescript = {
+			tsserver = {
+				maxTsServerMemory = 16384,
+			},
+			-- Inlay hints disabled — they're noisy and add memory pressure on huge repos.
 			inlayHints = {
-				includeInlayParameterNameHints = "all",
-				includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-				includeInlayFunctionParameterTypeHints = true,
+				includeInlayParameterNameHints = "none",
+				includeInlayFunctionParameterTypeHints = false,
 				includeInlayVariableTypeHints = false,
-				includeInlayPropertyDeclarationTypeHints = true,
+				includeInlayPropertyDeclarationTypeHints = false,
 				includeInlayFunctionLikeReturnTypeHints = false,
-				includeInlayEnumMemberValueHints = true,
+				includeInlayEnumMemberValueHints = false,
 			},
 			suggest = {
 				includeCompletionsForModuleExports = true,
@@ -327,6 +330,29 @@ vim.lsp.config('ts_ls', {
 			preferences = {
 				includeCompletionsWithSnippetText = true,
 				includeCompletionsForImportStatements = true,
+				-- "off" prevents tsserver from indexing every package.json in the
+				-- workspace for auto-imports — biggest memory hog in monorepos.
+				-- Auto-imports from already-imported files still work.
+				includePackageJsonAutoImports = "off",
+			},
+		},
+		javascript = {
+			inlayHints = {
+				includeInlayParameterNameHints = "none",
+				includeInlayFunctionParameterTypeHints = false,
+				includeInlayVariableTypeHints = false,
+				includeInlayPropertyDeclarationTypeHints = false,
+				includeInlayFunctionLikeReturnTypeHints = false,
+				includeInlayEnumMemberValueHints = false,
+			},
+			suggest = {
+				includeCompletionsForModuleExports = true,
+				includeCompletionsWithInsertText = true,
+			},
+			preferences = {
+				includeCompletionsWithSnippetText = true,
+				includeCompletionsForImportStatements = true,
+				includePackageJsonAutoImports = "off",
 			},
 		},
 	},
@@ -336,6 +362,9 @@ vim.lsp.config('ts_ls', {
 		if client.server_capabilities.inlayHintProvider then
 			vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
 		end
+
+		-- Warm the workspace symbol index so the first search is fast.
+		vim.lsp.buf_request(bufnr, 'workspace/symbol', { query = '' }, function() end)
 
 		local opts = { noremap = true, silent = true, buffer = bufnr }
 		vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
@@ -369,7 +398,7 @@ vim.lsp.config('ts_ls', {
 		end, { expr = true, buffer = bufnr })
 	end,
 })
-vim.lsp.enable('ts_ls')
+vim.lsp.enable('vtsls')
 
 -- Lua Language Server
 vim.lsp.config('lua_ls', {
