@@ -39,7 +39,18 @@ vim.diagnostic.config({
 vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Open diagnostic float" })
 vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to previous diagnostic" })
 vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Go to next diagnostic" })
-vim.keymap.set("n", "<leader>lq", vim.diagnostic.setloclist, { desc = "Open diagnostic list" })
+-- <leader>lq: all diagnostics, errors first.
+vim.keymap.set("n", "<leader>lq", function()
+	local diags = vim.diagnostic.get(0)
+	table.sort(diags, function(a, b) return a.severity < b.severity end)
+	local items = vim.diagnostic.toqflist(diags)
+	vim.fn.setloclist(0, {}, ' ', { title = 'Diagnostics', items = items })
+	vim.cmd('lopen')
+end, { desc = "Diagnostics sorted by severity" })
+-- <leader>le: errors only.
+vim.keymap.set("n", "<leader>le", function()
+	vim.diagnostic.setloclist({ severity = vim.diagnostic.severity.ERROR })
+end, { desc = "Errors only" })
 
 -- LSP debugging commands
 vim.keymap.set("n", "<leader>li", "<cmd>LspInfo<cr>", { desc = "LSP Info" })
@@ -126,12 +137,13 @@ cmp.setup({
 	},
 	formatting = {
 		format = function(entry, vim_item)
-			-- Custom formatting to make function signatures more prominent
 			if vim_item.kind == "TypeParameter" and entry.completion_item.detail then
 				vim_item.kind = "Function"
 				vim_item.menu = "[LSP-Sig]"
 			elseif entry.completion_item.detail then
-				vim_item.menu = entry.completion_item.detail
+				-- Truncate detail to avoid verbose ty type signatures flooding the menu column.
+				local detail = entry.completion_item.detail
+				vim_item.menu = #detail > 40 and detail:sub(1, 40) .. "…" or detail
 			else
 				vim_item.menu = ({
 					nvim_lsp = "[LSP]",
@@ -186,76 +198,92 @@ capabilities.textDocument.completion.completionItem.resolveSupport = {
 	},
 }
 
--- Configure pylsp with refined settings to reduce duplicates
-vim.lsp.config('pylsp', {
+-- pylsp: commented out in favour of ty as the sole Python LSP.
+-- ty now has full LSP feature coverage (completion, hover, gd, references, rename, etc.)
+-- To revert: uncomment this block, comment out the ty block below, and :LspRestart.
+--
+-- vim.lsp.config('pylsp', {
+-- 	capabilities = capabilities,
+-- 	settings = {
+-- 		pylsp = {
+-- 			plugins = {
+-- 				pycodestyle = { enabled = true },
+-- 				pyflakes = { enabled = true },
+-- 				flake8 = { enabled = false },
+-- 				pylint = { enabled = false },
+-- 				yapf = { enabled = false },
+-- 				autopep8 = { enabled = false },
+-- 				black = { enabled = true, line_length = 120 },
+-- 				jedi_completion = {
+-- 					enabled = true, include_params = true,
+-- 					include_class_objects = false, include_function_objects = true,
+-- 					fuzzy = true, eager = false, resolve_at_most = 15,
+-- 					cache_for = { "pandas", "numpy", "tensorflow", "matplotlib" },
+-- 				},
+-- 				jedi_hover = { enabled = true },
+-- 				jedi_references = { enabled = true },
+-- 				jedi_signature_help = { enabled = true },
+-- 				jedi_symbols = { enabled = true, all_scopes = false, include_import_symbols = true },
+-- 				rope_completion = { enabled = false },
+-- 				rope_autoimport = { enabled = false },
+-- 			},
+-- 		},
+-- 	},
+-- 	on_attach = function(client, bufnr)
+-- 		require("lsp_signature").on_attach(signature_config, bufnr)
+-- 		if client.server_capabilities.inlayHintProvider and vim.lsp.inlay_hint then
+-- 			vim.lsp.inlay_hint.enable(bufnr, true)
+-- 		end
+-- 		local opts = { noremap = true, silent = true, buffer = bufnr }
+-- 		vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+-- 		vim.keymap.set("n", "<leader>gtd", go_to_definition_new_tab, opts)
+-- 		vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+-- 		vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
+-- 		vim.keymap.set("n", "<C-k>", vim.lsp.buf.signature_help, opts)
+-- 		vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
+-- 		vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+-- 		vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+-- 		vim.keymap.set("n", "<leader>f", function() vim.lsp.buf.format({ async = true }) end, opts)
+-- 		vim.keymap.set("i", "<C-s>", vim.lsp.buf.signature_help, opts)
+-- 	end,
+-- })
+-- vim.lsp.enable('pylsp')
+
+-- ty: sole Python LSP. Full-featured as of v0.0.59 (completion, hover, gd, references,
+-- rename, code actions, inlay hints, signature help, workspace symbols).
+-- Does NOT support: textDocument/implementation (gi), formatting (use ruff instead).
+vim.lsp.config('ty', {
+	cmd = { 'ty', 'server' },
+	filetypes = { 'python' },
+	root_markers = { 'pyproject.toml', 'setup.py', 'setup.cfg', 'requirements.txt', '.git' },
 	capabilities = capabilities,
-	settings = {
-		pylsp = {
-			plugins = {
-				pycodestyle = { enabled = true },
-				pyflakes = { enabled = true },
-
-				-- Disable some conflicting plugins
-				flake8 = { enabled = false },
-				pylint = { enabled = false },
-
-				-- disable other formatters
-				yapf = { enabled = false },
-				autopep8 = { enabled = false },
-
-				-- Optional: Enable black for formatting
-				black = {
-					enabled = true,
-					line_length = 120,
-				},
-
-				-- Enable Jedi for completion with parameters
-				jedi_completion = {
-					enabled = true,
-					include_params = true,
-					include_class_objects = false, -- Reduce duplicates
-					include_function_objects = true,
-					fuzzy = true,
-					eager = false,
-					resolve_at_most = 15, -- Reduce to avoid too many options
-					cache_for = { "pandas", "numpy", "tensorflow", "matplotlib" },
-				},
-				jedi_hover = { enabled = true },
-				jedi_references = { enabled = true },
-				jedi_signature_help = { enabled = true },
-				jedi_symbols = {
-					enabled = true,
-					all_scopes = false, -- Reduce duplicates
-					include_import_symbols = true,
-				},
-
-				-- Disable rope completion to avoid duplicates
-				rope_completion = { enabled = false },
-				rope_autoimport = { enabled = false },
-			},
-		},
-	},
 	on_attach = function(client, bufnr)
-		-- Setup lsp_signature for this buffer
 		require("lsp_signature").on_attach(signature_config, bufnr)
 
-		if client.server_capabilities.inlayHintProvider and vim.lsp.inlay_hint then
-			vim.lsp.inlay_hint.enable(bufnr, true)
+		if client.server_capabilities.inlayHintProvider then
+			vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
 		end
+
+		-- Warm the workspace symbol index so the first search is fast.
+		vim.lsp.buf_request(bufnr, 'workspace/symbol', { query = '' }, function() end)
 
 		local opts = { noremap = true, silent = true, buffer = bufnr }
 		vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
 		vim.keymap.set("n", "<leader>gtd", go_to_definition_new_tab, opts)
 		vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-		vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
+		-- gi (implementation) not supported by ty yet; omitted to avoid silent no-op.
 		vim.keymap.set("n", "<C-k>", vim.lsp.buf.signature_help, opts)
 		vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
 		vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
-		vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
-		vim.keymap.set("n", "<leader>f", function()
-			vim.lsp.buf.format({ async = true })
+		vim.keymap.set("n", "grr", function()
+			vim.lsp.buf.references(nil, {
+				on_list = function(options)
+					vim.fn.setqflist({}, ' ', options)
+					vim.cmd('botright copen')
+				end,
+			})
 		end, opts)
-
+		-- <leader>f: formatting handled by ruff LSP (configured below).
 		vim.keymap.set("i", "<C-s>", vim.lsp.buf.signature_help, opts)
 
 		-- vsnip key mappings
@@ -276,21 +304,27 @@ vim.lsp.config('pylsp', {
 		end, { expr = true, buffer = bufnr })
 	end,
 })
-vim.lsp.enable('pylsp')
+vim.lsp.enable('ty')
 
--- ty: Astral's typed Python LSP. Provides workspace/symbol for fast symbol search.
--- Runs alongside pylsp; pylsp owns completion/hover, ty owns workspace symbols + type diagnostics.
-vim.lsp.config('ty', {
-	cmd = { 'ty', 'server' },
+-- ruff: linting + formatting for Python. Runs alongside ty (ty owns types/navigation,
+-- ruff owns lint diagnostics and <leader>f formatting).
+-- Activates in any Python project; respects pyproject.toml / ruff.toml automatically.
+vim.lsp.config('ruff', {
+	cmd = { 'ruff', 'server' },
 	filetypes = { 'python' },
-	root_markers = { 'pyproject.toml', 'setup.py', 'setup.cfg', 'requirements.txt', '.git' },
+	root_markers = { 'pyproject.toml', 'ruff.toml', '.ruff.toml', '.git' },
 	capabilities = capabilities,
 	on_attach = function(client, bufnr)
-		-- Warm the workspace symbol index so the first search is fast.
-		vim.lsp.buf_request(bufnr, 'workspace/symbol', { query = '' }, function() end)
+		-- ruff doesn't provide hover; let ty handle it.
+		client.server_capabilities.hoverProvider = false
+		local opts = { noremap = true, silent = true, buffer = bufnr }
+		-- Restore <leader>f for formatting via ruff.
+		vim.keymap.set("n", "<leader>f", function()
+			vim.lsp.buf.format({ async = true, name = "ruff" })
+		end, opts)
 	end,
 })
-vim.lsp.enable('ty')
+vim.lsp.enable('ruff')
 
 -- vtsls: TypeScript/JavaScript LSP. Replaces typescript-language-server.
 -- Built directly on tsserver — better feature parity with VSCode and faster on monorepos.
