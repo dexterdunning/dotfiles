@@ -24,7 +24,8 @@ Plug 'farmergreg/vim-lastplace'
 Plug 'unblevable/quick-scope' 
 Plug 'psliwka/vim-smoothie'
 Plug 'lukas-reineke/indent-blankline.nvim'
-" Plug 'sindrets/diffview.nvim'
+Plug 'dlyongemallo/diffview.nvim', { 'as': 'diffview.nvim', 'on': ['DiffviewOpen', 'DiffviewFileHistory', 'DiffviewClose', 'DiffviewFocusFiles', 'DiffviewToggleFiles'] }
+Plug 'pwntester/octo.nvim'
 " Plug 'chrisbra/csv.vim'
 Plug 'folke/todo-comments.nvim'
 Plug 'MeanderingProgrammer/render-markdown.nvim'
@@ -114,6 +115,8 @@ source $HOME/.config/nvim/vim-files/remaps.vim
 source $HOME/.config/nvim/vim-files/color.vim
 
 source $HOME/.config/nvim/plug-config/fugitive.vim
+source $HOME/.config/nvim/plug-config/diffview.vim
+source $HOME/.config/nvim/plug-config/local-review.vim
 source $HOME/.config/nvim/plug-config/cheat40.vim
 source $HOME/.config/nvim/plug-config/python-syntax.vim
 source $HOME/.config/nvim/plug-config/splitjoin.vim
@@ -146,8 +149,11 @@ vim.defer_fn(function()
   require('workspace-symbols').setup_keymaps()
   require('fidget').setup({})
   require('lsp-eager').setup()
+  require('octo-config')
 end, 0)
 EOF
+
+source $HOME/.config/nvim/plug-config/octo.vim
 
 
 " lua require('quickscope')

@@ -3,6 +3,10 @@ local cb = require'diffview.config'.diffview_callback
 require'diffview'.setup {
   diff_binaries = false,    -- Show diffs for binaries
   enhanced_diff_hl = false, -- See ':h diffview-config-enhanced_diff_hl'
+  view = {
+    -- 0 = collapse unchanged regions (hunk-focused review). zR/zM toggle in view maps.
+    foldlevel = 0,
+  },
   use_icons = true,         -- Requires nvim-web-devicons
   icons = {                 -- Only applies when use_icons is true.
     folder_closed = "",
@@ -19,6 +23,7 @@ require'diffview'.setup {
         height = 10,                  -- Only applies when position is 'top' or 'bottom'
     },
     listing_style = "tree",       -- One of 'lis' or 'tree'
+    show_branch_name = true,
     tree_options = {              -- Only applies when listing_style is 'tree'
       flatten_dirs = true,
       folder_statuses = "always"  -- One of 'never', 'only_folded' or 'always'.
@@ -59,8 +64,20 @@ require'diffview'.setup {
       ["gf"]         = cb("goto_file"),          -- Open the file in a new split in previous tabpage
       ["<C-w><C-f>"] = cb("goto_file_split"),    -- Open the file in a new split
       ["<C-w>gf"]    = cb("goto_file_tab"),      -- Open the file in a new tabpage
+      ["<leader>gf"] = cb("goto_file_tab"),      -- Open the file in a new tabpage
       ["<leader>e"]  = cb("focus_files"),        -- Bring focus to the files panel
       ["<leader>b"]  = cb("toggle_files"),       -- Toggle the files panel.
+      gcc            = function()
+        require("local-review").start()
+      end,
+      ["zR"]         = cb("open_all_folds"),
+      ["zM"]         = cb("close_all_folds"),
+      ["]c"]         = function()
+        vim.cmd.normal({ "]c", bang = true })
+      end,
+      ["[c"]         = function()
+        vim.cmd.normal({ "[c", bang = true })
+      end,
     },
     file_panel = {
       ["j"]             = cb("next_entry"),           -- Bring the cursor to the next file entry
@@ -80,6 +97,7 @@ require'diffview'.setup {
       ["gf"]            = cb("goto_file"),
       ["<C-w><C-f>"]    = cb("goto_file_split"),
       ["<C-w>gf"]       = cb("goto_file_tab"),
+      ["<leader>gf"]    = cb("goto_file_tab"),
       ["i"]             = cb("listing_style"),        -- Toggle between 'list' and 'tree' views
       ["f"]             = cb("toggle_flatten_dirs"),  -- Flatten empty subdirectories in tree listing style.
       ["<leader>e"]     = cb("focus_files"),
@@ -102,6 +120,7 @@ require'diffview'.setup {
       ["gf"]            = cb("goto_file"),
       ["<C-w><C-f>"]    = cb("goto_file_split"),
       ["<C-w>gf"]       = cb("goto_file_tab"),
+      ["<leader>gf"]    = cb("goto_file_tab"),
       ["<leader>e"]     = cb("focus_files"),
       ["<leader>b"]     = cb("toggle_files"),
     },

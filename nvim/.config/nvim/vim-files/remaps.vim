@@ -15,10 +15,6 @@ nnoremap <Leader>w, 10<C-w>>
 " tab remaps
 nnoremap <silent><leader>gn :tabnew<cr>
 
-" line remaps
-nnoremap <leader>o o<esc>
-nnoremap <leader>O O<esc>
-
 " center display within line
 nnoremap <silent>z. zszH
 
