@@ -1,0 +1,71 @@
+---
+name: handoff-prompt
+argument-hint: [what the prompt should accomplish]
+description: Draft a self-contained, copyable markdown prompt for handoff to another agent, a new chat session, or a teammate. Use whenever the user asks for "a handoff prompt", "a prompt I can paste", "a prompt to give to a new agent", "write me a prompt for X", "draft a prompt so I can spawn an agent", or similar — including when they want to hand off a slice of the current conversation to a fresh context. Trigger eagerly; if someone says anything about generating prompts to run elsewhere, use this skill even if they don't explicitly say "copyable".
+---
+
+Draft a prompt the user can copy and paste to hand off a task. Task context: $ARGUMENTS
+
+## What "copyable" means here
+
+Wrap the entire prompt in a fenced code block using **four backticks**:
+
+````markdown
+<the prompt>
+````
+
+Four backticks (not three) because the prompt body will almost certainly contain triple-backtick code blocks of its own. If the outer fence is triple, the copy breaks at the first inner code block. Use more backticks on the outside than anything on the inside — if the prompt contains `````\`\`\`\``````, escalate further.
+
+Nothing else about your reply should be inside the code fence. Any explanation to the user ("I leaned exploratory here because…") belongs outside the fence as normal prose, after the block.
+
+## The core move: brief a cold colleague
+
+The recipient of this prompt does not have the current conversation. They are not you. They do not know what the user is working on, what's been tried, what's been ruled out, or why this matters. Your job is to transplant enough of that context that they can act without asking clarifying questions.
+
+Concretely, good prompts tend to have:
+
+- **What the user wants done**, stated in one or two sentences up top.
+- **Why it matters** — what problem this solves, what it unblocks, who cares. One sentence is often enough. This is what lets the recipient make judgment calls instead of following narrow instructions.
+- **What's already known** — file paths with line numbers, commands the user has already run, PRs or commits that established the current state, things that were tried and didn't work. Dump the facts; the recipient can filter.
+- **Constraints** — conventions to follow, things not to touch, commit message prefixes, branch naming rules, owners to respect. Pull these from the user's AGENTS.md / CLAUDE.md, project conventions, or prior conversation if relevant.
+- **What "done" looks like** — verification steps, success criteria, what to report back. If the task is exploration, say so explicitly and say what the exploration should produce.
+
+Prompts without these read like fortune cookies. The recipient has to guess, and that guess is often wrong.
+
+## Prescriptive vs. exploratory
+
+The single biggest variable is how much of the thinking the user has already done. Read the conversation:
+
+- **Prescriptive** — user has diagnosed the problem, knows the fix pattern, wants the prompt to execute a known solution. Write it as: here is the bug, here is the fix, here are the files, here is how to verify. The recipient's job is mechanical.
+- **Exploratory** — user has observed something but doesn't yet know the right answer, or the code is someone else's and they want options before committing. Write it as: here is what we see, here is what to investigate, come back with 2-3 candidate approaches and a recommendation. Explicitly say *"do not write the fix yet"* so the recipient doesn't jump ahead.
+
+If you can't tell, ask the user one short question before drafting. Don't guess — a prescriptive prompt on an exploratory task produces a confident wrong patch; an exploratory prompt on a prescriptive task wastes the user's time.
+
+Mixed prompts exist (prescriptive for part A, exploratory for part B). That's fine — just be explicit about which is which.
+
+## Never delegate the understanding
+
+If you find yourself writing phrases like "based on your findings, fix the bug" or "based on the research, implement it" — stop. Those phrases push synthesis onto the recipient instead of doing it yourself. They indicate you skipped a step.
+
+Rewrite to prove you processed the context:
+- Not "figure out what's broken" — "the bug is in `file.py:60` where `isinstance(raw, DBRef)` trips the proxy".
+- Not "fix the issue" — "replace the check with `type(raw) is DocumentProxy` to avoid triggering `__class__`".
+
+The specifics come from your current conversation. Extract them and plant them in the prompt. The recipient shouldn't have to rediscover what you already know.
+
+## Length and shape
+
+Prompts should be as long as they need to be and no longer. A one-line prompt ("fix the typo in README") is fine. A 60-line prompt with six sections is fine if the task needs it. What's not fine is padding — generic preambles, restated instructions, filler headers.
+
+Organize with headers only when the prompt is long enough that headers help navigation. Short prompts read better as prose paragraphs.
+
+If the prompt has a natural list structure (files to touch, steps to run, options to consider), use lists. Don't force prose where bullets are clearer, and don't force bullets where prose flows better.
+
+## Final-touch conventions
+
+- Include file paths with absolute or repo-relative form — whichever matches the recipient's likely working directory. In this codebase, repo-relative paths like `app/foo/bar.py` usually work.
+- Include line numbers when referencing specific code, like `file.py:123`.
+- Reference PRs, commits, or JIRA tickets by number when relevant.
+- If there's a tracking doc, memo, or spec the recipient should read, name its full path explicitly — don't say "see the doc", say "see `/Users/dexter/projects/docs/foo/bar.md`".
+- If the user has conventions in their AGENTS.md / CLAUDE.md (commit prefix, PR template, branch naming), mention the ones relevant to the task.
+- Close with one sentence outside the code fence explaining any non-obvious choice you made (why exploratory vs. prescriptive, what you pruned, what you amplified). Keep it short.
