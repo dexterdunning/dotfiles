@@ -24,11 +24,40 @@ local function git_ok(cmd)
 	return vim.v.shell_error == 0, out
 end
 
----PR base branch when on a PR, else upstream, else origin/HEAD, else origin/master.
+---True if `ref` resolves to a commit in this worktree.
+local function ref_exists(ref)
+	local ok = git_ok({ "git", "rev-parse", "--verify", "--quiet", ref })
+	return ok
+end
+
+---Prefer local <name>, then origin/<name>. Returns nil if neither exists.
+---Local-first so stacked-branch review uses this machine's parent tip, not a stale fetch.
+---@param name string branch name without remote prefix
+---@return string|nil ref
+local function resolve_branch_ref(name)
+	if ref_exists(name) then
+		return name
+	end
+	local remote = "origin/" .. name
+	if ref_exists(remote) then
+		return remote
+	end
+	return nil
+end
+
+---PR base (stack parent) when on a PR, else upstream, else origin/HEAD, else origin/master.
+---`gh` is only used to learn the parent *name*; the rev range is always local git objects.
 function M.resolve_base_remote()
 	local ok, out = git_ok({ "gh", "pr", "view", "--json", "baseRefName", "-q", ".baseRefName" })
 	if ok and out[1] and out[1] ~= "" then
-		return "origin/" .. out[1], "pr:" .. out[1]
+		local name = out[1]
+		local ref = resolve_branch_ref(name)
+		if ref then
+			local kind = vim.startswith(ref, "origin/") and "pr" or "pr-local"
+			return ref, kind .. ":" .. name
+		end
+		-- Last resort: still return origin/… so Diffview's error names the missing fetch.
+		return "origin/" .. name, "pr:" .. name
 	end
 
 	ok, out = git_ok({ "git", "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}" })
