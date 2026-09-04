@@ -1,4 +1,9 @@
 **/*.DS_Store
+.claude-plugin/
+agents/dexter-skills/
+agents/.agents/.skill-lock.json
+agents/.agents/skills/investigate/
+agents/.agents/skills/launchdarkly-flag-command/
 **/__pycache__/
 **/*ninja-dev-sync.json
 **/*ada
