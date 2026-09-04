@@ -6,9 +6,15 @@ description: Draft a self-contained, copyable markdown prompt for handoff to ano
 
 Draft a prompt the user can copy and paste to hand off a task. Task context: $ARGUMENTS
 
-## What "copyable" means here
+## Where the prompt goes (default: tmp file)
 
-Wrap the entire prompt in a fenced code block using **four backticks**:
+**Default: write the prompt to a tmp markdown file and give the user the path**, so they can open it and copy the whole thing in one action instead of scrolling chat. Use `~/projects/docs/tmp/handoff-<short-slug>-<YYYYMMDD>.md` (create the dir if missing). The file's raw contents are the prompt body — no outer code fence in the file. Then in chat, give the path + a one-line summary, and also print the prompt inline (fenced, below) unless the user asked for file-only.
+
+Skip the file only if the user explicitly asks for inline-only, or the prompt is a one-liner.
+
+## What "copyable" means (inline rendering)
+
+When showing the prompt inline in chat, wrap the entire prompt in a fenced code block using **four backticks**:
 
 ````markdown
 <the prompt>

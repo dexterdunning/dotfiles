@@ -1,7 +1,7 @@
 ---
 name: worklog-brag
 description: Generate a monthly brag doc for manager 1:1s — interview rounds to fill gaps before data expires
-argument-hint: [--month 2026-06] [--quick draft-only, skip interview rounds]
+argument-hint: "[--month 2026-06] [--quick draft-only, skip interview rounds]"
 allowed-tools: Bash(*), Read(*), Grep(*), Glob(*), Write(*), Edit(*), AskUserQuestion(*), Task(*)
 ---
 

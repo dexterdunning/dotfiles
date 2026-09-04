@@ -5,7 +5,7 @@ description: >-
   Supports self-review (gaps + proposed edits) and peer-review (prioritized
   findings only). Use when reviewing a tech spec, design doc, or design review;
   or when asked for /review-spec.
-argument-hint: [self|peer] [path or topic]
+argument-hint: "[self|peer] [path or topic]"
 ---
 
 Review a technical specification. Two modes share one checklist; they differ in voice and whether edits are proposed.

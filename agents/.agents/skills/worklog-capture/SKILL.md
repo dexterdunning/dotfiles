@@ -36,11 +36,28 @@ Read `~/.worklog/config.yaml` to get tags and their hints.
 Guide the user through a narrative with these questions (use AskUserQuestion):
 
 1. **What project or accomplishment?** (title)
-2. **What type?** win / lesson / incident-retro / design-decision
+2. **What type?** win / lesson / incident-retro / design-decision / feedback-received
 3. **What did you do and why was it hard?** (2-5 sentences)
-4. **What was the quantitative impact?** (optional but encouraged)
+4. **What was the quantitative impact?** (optional but encouraged — capture the headline
+   before/after metric now, e.g. `write_conflicts: 6.8M -> 1.4M (-80%)`, so it doesn't have
+   to be re-derived from a dashboard later)
 5. **What would you do differently?** (optional — growth signal)
 6. **Any supporting links?** (PRs, docs, dashboards)
+
+**Always also prompt for the review-wiring fields** (these are what perf reviews actually
+probe, and are cheap to answer at capture time but painful to reconstruct later):
+
+7. **Ownership** — `driver | contributor | enabler | reviewer`. Who else drove/reviewed it?
+   Record their name + role if they're a senior/peer whose attribution matters.
+8. **Review-worthy?** — is this a story you'd put in a self-review? If yes, note *which
+   question shape* it fits (achievement / missed-opportunity / leadership-principle /
+   growth) so review time is assembly, not archaeology.
+9. **Feedback received** — if this came out of feedback from a manager/peer (esp. critical or
+   constructive), capture WHO said it and WHAT they said. Received-feedback is the hardest
+   Q2/Q4 material to surface later; record it when it happens.
+10. **Incident linkage** — if this resolves or was caused by an incident, record
+    `resolves_incidents:` / `caused_incident:` explicitly, plus any leadership-attributed
+    impact quote (e.g. "Willy: this caused all 3 DB incidents").
 
 ### Step 3: Tag
 
@@ -54,9 +71,16 @@ Write to `~/.worklog/narratives/<date>_<slug>.md`:
 ---
 date: YYYY-MM-DD
 tags: [tag1, tag2]
-type: win | lesson | incident-retro | design-decision
+type: win | lesson | incident-retro | design-decision | feedback-received
 source: slack | manual
 slack_link: <URL if from Slack>
+ownership: driver | contributor | enabler | reviewer
+review_worthy: achievement | missed-opportunity | leadership-principle | growth | no
+metrics:
+  - <label>: <before> -> <after> (<delta>)
+resolves_incidents: ["#inc-..."]   # if applicable
+caused_incident: "#inc-..."        # if applicable
+feedback_from: "<name> (<role>): <what they said>"   # if applicable
 ---
 
 # <Title>

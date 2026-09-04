@@ -1,6 +1,6 @@
 ---
 name: new-skill
-argument-hint: [skill-name] [one-line purpose, or blank to interview]
+argument-hint: "[skill-name] [one-line purpose, or blank to interview]"
 description: Create a new personal Dexter skill in the shared ~/.agents/skills home and wire Cursor/Claude/Pi symlinks (and optional Claude /command). Use when the user says /new-skill, asks to add/create a personal skill, or wants to register a skill in the central symlink layout.
 ---
 

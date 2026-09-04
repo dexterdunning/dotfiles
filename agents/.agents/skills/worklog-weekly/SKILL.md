@@ -17,11 +17,27 @@ $ARGUMENTS — accepts either:
 
 Heuristic: if the argument is `>= 2026` or starts with `W`/`w`, treat as a specific week. Otherwise treat as weeks-back.
 
+## Slack tooling note (read once)
+
+The Slack search/read tools are named differently per harness. Match by suffix, not exact string:
+- Claude: `mcp__claude_ai_Slack__slack_search_public_and_private`, `..._read_thread`, `..._read_channel`, `..._search_channels`
+- pi / MCP gateway: `slack_slack_search_public_and_private`, `slack_slack_read_thread`, `slack_slack_read_channel`, `slack_slack_search_channels`
+
+When this doc says `slack_search_public_and_private` (etc.), use whichever prefixed name your harness exposes.
+
+**Response shape:** the search tool returns its payload as a JSON *string* nested at `data.content[0].text`. Parse that string; it has a `results` field (a numbered markdown list of `N. <channel> - <user>: <text> <YYYY-MM-DD HH:MM:SS TZ>`) and a `pagination_info` line containing `cursor \`<cursor>\``.
+
+**Pagination + result cap:** `limit` is effectively ignored — the tool returns ~20 results/page and hard-caps around ~350 total per query regardless of paging. For any window longer than ~1 week you **must chunk by date** (e.g. query a week, and when results stop well before `before:`, re-query with `after:` set to the last returned date until you reach the real end). Sort ascending (`sort:"timestamp", sort_dir:"asc"`) so you can tell truncation (tail stops early) from genuine quiet.
+
+**DMs dominate.** A `from:@<user>` query is authorship-scoped and DMs/self-notes often outnumber real channel posts (e.g. 281 of 354). Since DMs eat the result cap before channels surface, date-chunking matters even for a single busy week. Exclude DMs/group DMs when aggregating (channel starts with `DM with` / `Group DM`, or `D`-prefixed / no `#` name).
+
 ## Steps
 
 ### Step 1: Load Config
 
 Read `~/.worklog/config.yaml` to get repos, github_user, slack_channels, and tags with hints.
+
+**Detect the catch-up gap.** List `~/.worklog/summaries/weekly/*.md`, find the most recent covered week, and compute weeks-since-last-run. If no argument was given, default to covering the gap (last-covered-week+1 through the current week) rather than assuming 1. Note that a plain weeks-back count silently spans PTO/quiet stretches — that's fine, but surface the true active date range from the Slack scan rather than the nominal window.
 
 ### Step 2: Determine Date Range
 
@@ -41,9 +57,9 @@ Use: `date -v-<days>d +%Y-%m-%d` on macOS.
 
 ### Step 3: Slack Context Discovery
 
-> **Availability check — do this first.** The Slack MCP (`mcp__claude_ai_Slack__*`) can be
+> **Availability check — do this first.** The Slack search tool (see "Slack tooling note" above) can be
 > unavailable due to OAuth server downtime or a missing session. Before attempting any Slack
-> calls, check whether `mcp__claude_ai_Slack__slack_search_public_and_private` is listed as
+> calls, check whether the `*slack_search_public_and_private` tool is listed as
 > an available tool. If it is not, or if any call returns a 503 / auth error:
 > - Print: "Slack MCP unavailable — skipping Steps 3 and 4. Proceeding with GitHub + Drive only."
 > - Skip the rest of Step 3 and all of Step 4.
@@ -52,13 +68,13 @@ Use: `date -v-<days>d +%Y-%m-%d` on macOS.
 
 #### Step 3a: Discover active channels
 
-Before reading any channels, find out which channels the user was actually active in this week. Use `mcp__claude_ai_Slack__slack_search_public_and_private` with a query like:
+Before reading any channels, find out which channels the user was actually active in this week. Use the `*slack_search_public_and_private` tool with a query like:
 
 ```
 from:@<slack_user> after:<start_date> before:<end_date+1day>
 ```
 
-(`before:` in Slack search is exclusive, so add a day.)
+(`before:` in Slack search is exclusive, so add a day.) Prefer querying by the user's Slack user_id (`from:<@U…>`) over display name. For multi-week windows, chunk by date and page through the cursor as described in the Slack tooling note — do not trust a single call to return the whole window.
 
 From the results:
 - Group messages by channel
@@ -76,7 +92,7 @@ Before deciding whether to launch Agent 1, automatically drill into threads from
 
 From the Step 3a results, identify every message where the user's message is a **thread reply** (i.e., the message has a `thread_ts` field that differs from its own `ts`, or the API indicates it is a reply rather than a top-level post). For each unique `(channel_id, thread_ts)` pair:
 
-1. Call `mcp__claude_ai_Slack__slack_read_thread` with the channel ID and thread timestamp.
+1. Call the `*slack_read_thread` tool with the channel ID and thread timestamp.
 2. From the thread, extract:
    - The **parent message** (full text — this is what the user was responding to)
    - **All replies**, filtered to those from the user (by display name from config's `slack_user`)
@@ -101,7 +117,7 @@ model: `haiku`
 
 Only launch when channels from config's `slack_channels` had no user activity in the Step 3a search results but may still contain relevant discussion. Prompt the agent with those specific channels, start_date, and end_date. It should:
 
-1. For each channel, use `mcp__claude_ai_Slack__slack_read_channel` to read recent messages. If that tool requires a channel ID, first use `mcp__claude_ai_Slack__slack_search_channels` to resolve the channel name to an ID.
+1. For each channel, use the `*slack_read_channel` tool to read recent messages. If that tool requires a channel ID, first use `*slack_search_channels` to resolve the channel name to an ID.
 
 2. Filter to messages sent by the user (match on display name from config's `slack_user`). Skip channels where the user posted nothing — do not summarize other people's activity.
 
@@ -152,8 +168,8 @@ model: `haiku`
 
 Search for incident channels the user participated in during the date range:
 
-1. Use `mcp__claude_ai_Slack__slack_search_channels` to search for channels matching `inc-` within the date range.
-2. For each matching channel, use `mcp__claude_ai_Slack__slack_read_channel` and check if the user (by display name) posted messages or was mentioned.
+1. Use the `*slack_search_channels` tool to search for channels matching `inc-` within the date range.
+2. For each matching channel, use `*slack_read_channel` and check if the user (by display name) posted messages or was mentioned.
 3. For channels with user involvement, extract:
    - Channel name and incident topic
    - User's messages and actions taken
@@ -340,6 +356,17 @@ For each accepted item, write a YAML entry to `~/.worklog/entries/<date>_<id>.ya
 
 Group related PRs into batch entries where it makes sense (e.g., a 3-step ETA migration = 1 entry with 3 links).
 
+**Review-wiring fields (add when known — cheap now, expensive to reconstruct later):**
+For any entry that could end up in a perf review, capture these at save time. Don't block on
+them; fill what's known.
+- `ownership: driver | contributor | enabler | reviewer` — your role, plus who else
+  drove/reviewed if a senior/peer's attribution matters.
+- `metrics:` — the headline before/after, e.g. `- write_conflicts: 6.8M -> 1.4M (-80%)`.
+- `review_worthy: achievement | missed-opportunity | leadership-principle | growth | no` —
+  which review-question shape this fits, so review time is assembly not archaeology.
+- `resolves_incidents:` / `caused_incident:` — explicit incident linkage, plus any
+  leadership-attributed impact quote.
+
 **Entry templates by type:**
 
 PR entry (single):
@@ -348,6 +375,10 @@ title: "<PR title cleaned up>"
 type: pr
 date: YYYY-MM-DD
 tags: [tag-id]
+ownership: driver
+review_worthy: achievement
+metrics:
+  - <label>: <before> -> <after>
 links:
   - https://github.com/Rippling/<repo>/pull/<number>
 impact: "1–3 sentence why/what."
@@ -407,7 +438,7 @@ Use AskUserQuestion to let the user choose.
 
 If the user shares a Slack link:
 
-1. Use `mcp__claude_ai_Slack__slack_read_thread` to get the full message + all replies.
+1. Use the `*slack_read_thread` tool to get the full message + all replies.
 2. Extract:
    - **Full message text** (preserving formatting, bullet points, bold)
    - **Key thread replies** — especially from leadership, skip "nice!" one-liners
@@ -468,7 +499,11 @@ Move on to the weekly summary. Gently note: "No narrative this week — consider
 
 ### Step 10: Generate Weekly Summary
 
-Generate a markdown summary at `~/.worklog/summaries/weekly/<year>-W<week>.md`:
+Generate a markdown summary at `~/.worklog/summaries/weekly/<year>-W<week>.md`.
+
+**Multi-week / catch-up runs:** when the window spans more than one ISO week (weeks-back ≥ 2, or a gap since the last run), write a single combined file named `<year>-W<start>-W<end>.md` (e.g. `2026-W28-W32.md`) and **group by theme/tag, not by week** — projects usually span multiple weeks, so a per-week split fragments them. Open the file noting the true active date range (from the Slack scan) and call out any weeks that were quiet/PTO.
+
+Single-week template:
 
 ```markdown
 # Week of <start-date> to <end-date>

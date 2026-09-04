@@ -1,7 +1,7 @@
 ---
 name: slack-draft
 description: Draft a Slack message in Dexter's voice. Use when asked to draft or write a Slack message, post in a channel, or reply to a thread.
-argument-hint: [channel-url-or-thread] [message-context]
+argument-hint: "[channel-url-or-thread] [message-context]"
 ---
 
 Draft a Slack message for the user. The task: $ARGUMENTS

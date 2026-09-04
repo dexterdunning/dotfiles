@@ -1,7 +1,7 @@
 ---
 name: worklog-summary
 description: Synthesize worklog into perf-review-ready project stories
-argument-hint: [--half H1-2026] [--quarter Q1-2026] [--year 2026] [--tag TAG]
+argument-hint: "[--half H1-2026] [--quarter Q1-2026] [--year 2026] [--tag TAG]"
 allowed-tools: Bash(*), Read(*), Grep(*), Glob(*), Write(*), Edit(*), AskUserQuestion(*)
 ---
 
