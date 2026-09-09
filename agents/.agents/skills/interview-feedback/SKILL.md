@@ -28,6 +28,19 @@ Draft paste-ready interview feedback grounded in what happened during the interv
 8. Draft concise, natural text in Dexter's voice. Lead with the decision, use specific examples, and avoid generic phrases such as "sound building blocks," "provided limited signal," or repeated "at the level/bar" framing.
 9. Write the draft under `~/projects/docs/`, never a product repository's docs directory. Use a descriptive filename and keep the scorecard sections easy to copy separately.
 
+## Rippling Coding/Algo scorecard structure
+
+When drafting for the standard Coding/Algo interview scorecard, produce these sections so each can be pasted separately:
+
+- **Overall rating** — Strong No / No / Yes / Strong Yes. Recommend one; when mixed signals make an adjacent rating defensible, name it and say what tips the scale.
+- **Overall feedback** — short paragraph leading with the decision.
+- **What question did you ask?** / **Which language did the candidate use?** — one-liners; use the exact dropdown question name when known (e.g. "Delivery Driver Rates + Copilot").
+- **Approach, completion, optimality, and guidance per part** — one labeled block per question part attempted; state explicitly when later parts were never reached.
+- **Code cleanliness** — Pass/Fail dropdown recommendation plus justification with specific examples.
+- **Requirements, communication, and receptiveness** — Pass/Fail dropdown recommendation plus justification. This is a combined rubric (gathered requirements independently / communicated clearly and concisely / receptive to feedback); name which leg drives the rating.
+- **AI usage** — brief description of how the candidate used the assistant, with positive or negative signal observed. Skip if not an AI interview.
+- **Leveling assessment** — usually `n/a` unless there is evidence the candidate fits a different level.
+
 ## Guardrails
 
 - Treat shadow feedback as an independent signal; do not inflate certainty or mirror the primary interviewer without evidence.
