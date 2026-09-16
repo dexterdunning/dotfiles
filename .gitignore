@@ -8,3 +8,4 @@ agents/.agents/skills/launchdarkly-flag-command/
 **/*ninja-dev-sync.json
 **/*ada
 **/*brazil
+**/node_modules/
