@@ -80,7 +80,7 @@ Always save under `~/projects/docs/`. Decide the subdirectory by asking, in orde
 2. **Could it fit in an existing folder?** Run `ls ~/projects/docs/` and look for an obvious home. If you find one or two plausible candidates, ask the user: "Save under existing folder `X` or create a new one `Y`?"
 3. **No clear home?** Suggest a new subdirectory name (kebab-case, scoped to the topic) and confirm with the user before creating.
 
-Never save explainers to `~/.claude/`, the rippling-main repo, or the project root.
+Never save explainers to `~/.claude/`, a product repo, or the project root.
 
 File naming: `<topic>_explainer.html` or just `<descriptive_name>.html` — lowercase, underscores or hyphens.
 

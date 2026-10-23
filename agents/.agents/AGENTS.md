@@ -9,7 +9,6 @@
 - Expand when the task is complex, when tradeoffs matter, or when Dexter asks for detail.
 - For tool-heavy work, summarize findings instead of narrating every command.
 - Preserve exact details that matter for code changes: file paths, line numbers, commands, errors, and test results.
-- For Rippling PR templates, use `N/A` for the JIRA section when there is no ticket instead of `TODO`.
 
 # Communication Style
 
@@ -41,6 +40,15 @@
 - Let Dexter drive pace. When he says "just track this," "hold off," or "I'll tell you when," stop and wait rather than proceeding to the next step.
 - Before moving to a new step, finish and report the current one — don't skip ahead past pending analysis.
 
+# Session Efficiency & Delegation
+
+- At a completed phase boundary, or when substantial unrelated history has accumulated, offer a checkpoint and fresh session using `handoff-prompt`. Ask before writing an unsolicited checkpoint; explicit checkpoint requests authorize it. Update the existing handoff rather than creating parallel documents.
+- Do not interrupt active debugging solely because context is large, impose a fixed token cutoff, or reset automatically. Preserve decisions, evidence, failed approaches, workspace state, and one concrete next action. Resolve consequential design forks before implementation.
+- Delegate only bounded, independently useful deliverables. Prefer direct tools or a local parser for work finishable in a few calls; do not use an expensive worker merely to summarize data a simple script can aggregate.
+- Give workers explicit write boundaries, a time/tool budget, stop conditions, and a compact output contract (findings plus artifact paths, not transcripts). Do not duplicate the worker's investigation in the parent.
+- Resume a worker when its existing context remains useful; start fresh when its scope was wrong. Inspect existing output before commissioning another pass.
+- Evaluate this workflow on comparable tasks using actual gateway spend, intended outcomes, rediscovery/corrections, and supervision time. Local cost estimates are not bills; do not claim savings from activity counts alone.
+
 # Editing Discipline
 
 - Use dedicated edit/patch tools for localized file changes whenever possible.
@@ -53,7 +61,10 @@
 
 # Stacked PRs & Cloud Agents
 
-- When fixing the base of a stacked PR, restack and force-push every upper branch before treating the stack as green. Do not leave upper PRs pointing at an old base tip.
+- Prefer **native GitHub stacks via `gh stack`** (the `github/gh-stack` extension). Do not use git-spice / `gs` or the separate `ghstack` tool.
+- A branch chain or navigation comment is not enough: link existing PRs with `gh stack link` and verify their common GitHub stack number, positions, and bases. Follow repo-required PR creation helpers and preserve existing draft/ready states; do not use `--open` implicitly.
+- Use `gh stack rebase` and `gh stack push` / authorized `gh stack sync` for stack updates. Merge atomically with `gh stack merge` only when explicitly requested. Do not promise one CI run unless pipeline deduplication is confirmed.
+- When fixing the base of a stacked PR, restack and publish every upper branch with lease protection before treating the stack as green. Do not leave upper PRs pointing at an old base tip.
 - Cloud agents often 403 when requesting GitHub reviewers. Do not loop on review-request API calls. Tell Dexter to set reviewers manually, and ask which reviewers if not already specified.
 
 # Debugging Discipline

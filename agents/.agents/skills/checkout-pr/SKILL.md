@@ -35,25 +35,37 @@ Search the output for the branch name. Worktrees show the branch in brackets, e.
 
 **If the branch is NOT in a worktree:**
 
-Check if this PR is part of a **stack** (base branch is NOT `master`/`main`). If stacked, check whether the **base branch** or any other branch in the stack is already in a worktree:
+Check the requested PR's remote stack metadata, not the stack of the current checkout:
 
-- **If the base branch IS in a worktree** (stacked PR case):
-  - Use that worktree — stacked branches must share a worktree so `gs stack restack` can switch between them.
-  - Fetch and checkout the target branch within that worktree:
-    ```bash
-    cd <base-branch-worktree-path>
-    git fetch origin <branch>
-    git checkout <branch>
-    ```
-  - Tell the user: "Branch `<branch>` is stacked on `<base>`, which is in worktree at `<path>`. Checked out `<branch>` there to keep the stack together."
+```bash
+gh api repos/<owner>/<repo>/pulls/<number> --jq '.stack'
+```
 
-- **If the base branch is NOT in a worktree** (standalone PR or stack not yet local):
-  - Create a new worktree in the standard location. The worktree name is the branch name with the `dexter-` prefix stripped (e.g. `dexter-fix-bug` → `fix-bug`):
+A non-trunk base alone is not proof of a native stack. If `.stack` is present, identify its members and check whether any member is already in a worktree:
+
+- **If a stack member IS in a worktree:**
+  - Use that worktree — stack branches stay together in one worktree.
+  - Discover the remote stack and check out its target there:
+    ```bash
+    cd <stack-worktree-path>
+    gh stack checkout <PR-URL-or-stack-number>
+    ```
+  - Tell the user which shared stack worktree is active.
+
+- **If no stack member is in a worktree** (standalone PR or stack not yet local):
+  - Create one worktree in the standard location. The worktree name is the branch
+    name with its repository-required personal/agent prefix stripped:
     ```bash
     git fetch origin <branch>
-    git worktree add /Users/dexter/projects/rippling-worktrees/<name> origin/<branch>
+    git worktree add "$HOME/projects/worktrees/<name>" origin/<branch>
     ```
+  - For a native stack, run `gh stack checkout <PR-URL-or-stack-number>` in that
+    worktree so the CLI discovers and tracks the stack branches locally. Do not
+    create one worktree per member.
   - Then use that worktree path as the working directory.
+
+Do not run `gh stack sync` or `gh stack rebase` merely to check out or inspect a PR;
+those commands mutate branch state.
 
 ### Step 4: Show context
 
@@ -61,7 +73,7 @@ Once in the right directory, show the current state:
 ```bash
 git log --oneline -5
 git status
-gs log short 2>/dev/null || true
+gh stack view --short 2>/dev/null || true
 ```
 
 Report the working directory, branch, and stack position (if any) to the user so they know where they're operating.

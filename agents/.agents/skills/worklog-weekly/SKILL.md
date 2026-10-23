@@ -7,6 +7,8 @@ allowed-tools: Bash(*), Read(*), Grep(*), Glob(*), Write(*), Edit(*), WebFetch(*
 
 Scan recent Slack, Google Drive, and GitHub activity to build a tagged weekly summary.
 
+**Optional local supplement:** if `~/.agents/skill-overrides/worklog-weekly/instructions.md` exists, read it first — it carries the org's repos, team names, pinned channels, and standing filter preferences. Without it, this workflow works with `~/.worklog/config.yaml` and user-provided sources.
+
 The flow is: Slack first (context discovery + incident channels), then Drive + GitHub in parallel, then interactive tagging.
 
 ## Input
@@ -29,7 +31,7 @@ When this doc says `slack_search_public_and_private` (etc.), use whichever prefi
 
 **Pagination + result cap:** `limit` is effectively ignored — the tool returns ~20 results/page and hard-caps around ~350 total per query regardless of paging. For any window longer than ~1 week you **must chunk by date** (e.g. query a week, and when results stop well before `before:`, re-query with `after:` set to the last returned date until you reach the real end). Sort ascending (`sort:"timestamp", sort_dir:"asc"`) so you can tell truncation (tail stops early) from genuine quiet.
 
-**DMs dominate.** A `from:@<user>` query is authorship-scoped and DMs/self-notes often outnumber real channel posts (e.g. 281 of 354). Since DMs eat the result cap before channels surface, date-chunking matters even for a single busy week. Exclude DMs/group DMs when aggregating (channel starts with `DM with` / `Group DM`, or `D`-prefixed / no `#` name).
+**DMs dominate.** A `from:@<user>` query is authorship-scoped and DMs/self-notes often outnumber real channel posts. Since DMs eat the result cap before channels surface, date-chunking matters even for a single busy week. Exclude DMs/group DMs when aggregating (channel starts with `DM with` / `Group DM`, or `D`-prefixed / no `#` name).
 
 ## Steps
 
@@ -106,7 +108,7 @@ Deduplicate against threads already fully captured in the Step 3a top-level mess
 
 #### Step 3c: Parallel deep-read
 
-**Shortcut: skip Agent 1 when the concise search + thread drill-down is enough.** The `slack_search_public_and_private` call from Step 3a (with `response_format: "concise"` and `include_context: false`) plus the thread drill-down from Step 3b already returns full message bodies, thread context, links, channel names, and timestamps for every matching message. If the user's week is dominated by short status posts and PR/dashboard link shares (no long threads worth mining), you have everything you need — synthesize work categories + extract links directly without launching Agent 1. **Only launch Agent 1 when** there are channels in the config's `slack_channels` list that had no user messages in the search results but may still have relevant context (e.g., a channel the user reads but rarely posts in). Agent 2 (incident discovery) usually still adds value because it discovers channels the user wasn't the author in.
+**Shortcut: skip Agent 1 when the concise search + thread drill-down is enough.** The `slack_search_public_and_private` call from Step 3a (with `response_format: "concise"` and `include_context: false`) plus the thread drill-down from Step 3b already returns full message bodies, thread context, links, channel names, and timestamps for every matching message. If the user's week is dominated by short status posts and PR/dashboard link shares (no long threads worth mining), you have everything you need — synthesize directly.
 
 Launch sub-agents in parallel only as needed:
 
@@ -145,7 +147,7 @@ Only launch when channels from config's `slack_channels` had no user activity in
       "summary": "2-3 bullet point summary",
       "linked_documents": ["https://docs.google.com/..."],
       "linked_dashboards": ["https://app.datadoghq.com/..."],
-      "linked_tickets": ["TANDA-1234"],
+      "linked_tickets": ["ABC-1234"],
       "linked_prs": ["https://github.com/..."]
     }
   ],
@@ -168,13 +170,13 @@ model: `haiku`
 
 Search for incident channels the user participated in during the date range:
 
-1. Use the `*slack_search_channels` tool to search for channels matching `inc-` within the date range.
+1. Use the `*slack_search_channels` tool to search for channels matching the org's incident-channel prefix (e.g. `inc-`) within the date range.
 2. For each matching channel, use `*slack_read_channel` and check if the user (by display name) posted messages or was mentioned.
 3. For channels with user involvement, extract:
    - Channel name and incident topic
    - User's messages and actions taken
-   - Any PRs, dashboards, webscripts, or docs linked
-   - Incident ticket IDs (INC-XXXX)
+   - Any PRs, dashboards, or docs linked
+   - Incident ticket IDs
 
 Return results as JSON:
 ```json
@@ -201,19 +203,19 @@ Present the Slack-derived work categories to the user:
 ```
 Based on your Slack messages this week, here's what I found:
 
-### #time-and-attendance-daily-async-update (12 messages)
-- Shared updates on deferred field refactor progress
-- Discussed company isolation rollout plan
-- Linked: Deferred Field Storage Redesign doc, TANDA-5678
+### #<channel-a> (12 messages)
+- Shared updates on refactor progress
+- Discussed rollout plan
+- Linked: <design doc>, ABC-5678
 
-### #time-platform-eng (4 messages)
-- Discussed ETA parameter migration approach
-- Reviewed request shape logging results
+### #<channel-b> (4 messages)
+- Discussed migration approach
+- Reviewed logging results
 
 Work categories identified:
-1. Deferred field refactor
-2. Company isolation / sharding
-3. Request shape instrumentation
+1. <category 1>
+2. <category 2>
+3. <category 3>
 
 Does this look right? Any categories to add, rename, or remove?
 ```
@@ -224,18 +226,18 @@ If the Slack scan found PRs the user discussed (not authored), present those too
 
 ```
 PRs you discussed in Slack (potential reviews to log):
-- PR #442271 "Add deferred field primitives skeleton" — discussed architecture approach
-- PR #435743 "Warm priorEntrySummary request cache" — discussed ETA scoping
+- PR #12345 "<title>" — discussed architecture approach
+- PR #12346 "<title>" — discussed scoping
 
 Log any of these as substantive reviews?
 ```
 
 Use AskUserQuestion to let the user select which (if any) to log.
 
-**Also ask about non-code artifacts.** Dashboards, webscripts, Snowflake queries, and other artifacts often don't surface from GitHub or Slack alone. Present whatever Slack/incident scanning found (Datadog links, Snowflake links, etc.) and ask:
+**Also ask about non-code artifacts.** Dashboards, internal scripts, warehouse queries, and other artifacts often don't surface from GitHub or Slack alone. Present whatever Slack/incident scanning found (dashboard links, etc.) and ask:
 
 ```
-Did you create any dashboards, webscripts, Snowflake queries, or other artifacts this week
+Did you create any dashboards, scripts, warehouse queries, or other artifacts this week
 that aren't covered above?
 ```
 
@@ -253,9 +255,9 @@ subagent_type: `general-purpose`
 model: `haiku`
 
 The agent should:
-1. For any Google Docs/Sheets/Slides URLs found in Slack messages, extract the file ID and use `mcp__google-drive__fetch_file` to get the title and metadata.
-2. For any document references by name (e.g., "the deferred field doc"), use `mcp__google-drive__search` with the name as the query, filtered by `modifiedAfter: <start_date>`.
-3. For any Jira ticket references, note them for the user (we won't fetch them, just list them).
+1. For any Google Docs/Sheets/Slides URLs found in Slack messages, extract the file ID and use the Drive MCP tool to get the title and metadata.
+2. For any document references by name (e.g., "the storage design doc"), use the Drive search tool with the name as the query, filtered by `modifiedAfter: <start_date>`.
+3. For any ticket references, note them for the user (we won't fetch them, just list them).
 
 Return results as JSON:
 ```json
@@ -268,7 +270,7 @@ Return results as JSON:
       "date_modified": "2026-03-05"
     }
   ],
-  "tickets": ["TANDA-1234", "TANDA-5678"]
+  "tickets": ["ABC-1234", "ABC-5678"]
 }
 ```
 
@@ -276,7 +278,7 @@ Return results as JSON:
 
 Run `gh` commands directly via Bash. Sub-agents tend to truncate large JSON output.
 
-**Discover additional repos from Slack.** Before running `gh pr list`, scan the Slack search results from Step 3a for any URLs matching `github.com/Rippling/<repo>/pull/<number>`. Extract the distinct `<repo>` set and union with config's `repos` plus `rippling-events`. Common additions for time-tracking work: `rippling-mobile`, `rippling-kiosk-time-clock`, `security-sas-rules`. Skipping this step misses cross-repo PRs (mobile fixes, semgrep rule updates, etc.).
+**Discover additional repos from Slack.** Before running `gh pr list`, scan the Slack search results from Step 3a for any URLs matching `github.com/<org>/<repo>/pull/<number>`. Extract the distinct `<repo>` set and union with config's `repos` plus the org's auxiliary event repos (if configured in the supplement). Skipping this step misses cross-repo PRs (mobile fixes, rules updates, etc.).
 
 **Use a single `--state all` query with `created:<start>..<end>`.** Beats the separate merged/open queries — surfaces PRs created in the week regardless of current state (open, merged-later, closed/abandoned). Also run a separate `--state merged --search "merged:<start>..<end>"` query to catch PRs created *earlier* but merged in this week (worth flagging for dedup against prior weeks).
 
@@ -292,9 +294,9 @@ For each repo in the unioned set, run:
    gh pr list --repo <repo> --author <github_user> --state open --json number,title,url,createdAt --limit 50 | python3 -c "import json,sys; prs=json.load(sys.stdin); [print(f'{p[\"createdAt\"][:10]} #{p[\"number\"]} {p[\"title\"]} {p[\"url\"]}') for p in sorted(prs, key=lambda x: x['createdAt'], reverse=True) if p['createdAt'][:10] >= '$start_date']"
    ```
 
-Also check `rippling-events` repo for domain event PRs:
+Also check the org's auxiliary repos configured for event/tooling PRs, if any:
 ```bash
-gh pr list --repo Rippling/rippling-events --author <github_user> --state all --search "created:>=$start_date" --json number,title,url,createdAt,mergedAt,state --limit 50
+gh pr list --repo <org>/<aux-repo> --author <github_user> --state all --search "created:>=$start_date" --json number,title,url,createdAt,mergedAt,state --limit 50
 ```
 
 **Note:** PR reviews are NOT fetched from GitHub API. Instead, reviews worth logging are identified from Slack discussion in Step 3 and confirmed by the user in Step 4.
@@ -309,13 +311,9 @@ gh pr list --repo Rippling/rippling-events --author <github_user> --state all --
 
 **Apply built-in filters before presenting items to the user:**
 
-- **rippling-webapp FF removal** — Drop any `rippling-webapp` PR whose sole purpose is
-  removing a fully rolled-out feature flag. Title patterns: starts with "Remove" and
-  mentions a flag name, or contains phrases like "Remove rolled-out" / "cleanup FF".
-  These carry no perf-review signal — the engineering judgment is captured by the rollout
-  itself, not the cleanup commit. Apply silently.
+- **Routine flag-removal PRs** — Drop any PR whose sole purpose is removing a fully rolled-out feature flag. Title patterns: starts with "Remove" and mentions a flag name, or contains phrases like "Remove rolled-out" / "cleanup FF". These carry no perf-review signal — the engineering judgment is captured by the rollout itself, not the cleanup commit. Apply silently.
 
-**Also apply persistent worklog filters from memory.** Read any worklog-specific filters from `~/.claude/projects/-Users-dexter-projects-rippling-main/memory/` (files matching `feedback_worklog_*.md`). These encode the user's standing preferences for what to silently drop beyond the built-in rules above. Apply them quietly; do not present filtered items for tagging. Note the combined count of filtered items (built-in + memory rules) in the final summary so the user can audit.
+**Also apply persistent worklog filters from memory.** Read any worklog-specific filters from the user's agent memory directory (files matching `feedback_worklog_*.md`), when present. These encode the user's standing preferences for what to silently drop beyond the built-in rules above. Apply them quietly; do not present filtered items for tagging. Note the combined count of filtered items (built-in + memory rules) in the final summary so the user can audit.
 
 ### Step 7: Interactive Tagging
 
@@ -329,22 +327,22 @@ Now present all items (PRs + confirmed docs + confirmed reviews) to the user for
 Present items grouped by work category (not by source):
 
 ```
-=== Deferred Field Refactor (3 items) ===
+=== <Category A> (3 items) ===
 
-[1/15] PR #445495 "[tanda] Decompose deferred field engine" (open, 2026-03-05)
-  Auto-tag: [deferred-field-refactor]
-[2/15] PR #446416 "Decompose _recomputeActiveDeferredFields" (open, 2026-03-07)
-  Auto-tag: [deferred-field-refactor]
-[3/15] Doc: "Deferred Field Storage Redesign" (2026-03-03)
-  Auto-tag: [deferred-field-refactor]
+[1/15] PR #12345 "<title>" (open, 2026-03-05)
+  Auto-tag: [category-a]
+[2/15] PR #12346 "<title>" (open, 2026-03-07)
+  Auto-tag: [category-a]
+[3/15] Doc: "<doc title>" (2026-03-03)
+  Auto-tag: [category-a]
 
-Accept all with [deferred-field-refactor]? (y) / Edit / Skip some
+Accept all with [category-a]? (y) / Edit / Skip some
 
-=== Company Isolation (8 items) ===
+=== <Category B> (8 items) ===
 ...
 
 === Uncategorized (2 items) ===
-[14/15] PR #444436 "Pass accumulated company to enforce_sensitive_company_check"
+[14/15] PR #12347 "<title>"
   No auto-tag — assign a tag or skip?
 ```
 
@@ -354,7 +352,7 @@ If the user wants to add a tag that doesn't exist, offer to create it (ask for t
 
 For each accepted item, write a YAML entry to `~/.worklog/entries/<date>_<id>.yaml`.
 
-Group related PRs into batch entries where it makes sense (e.g., a 3-step ETA migration = 1 entry with 3 links).
+Group related PRs into batch entries where it makes sense (e.g., a 3-step migration = 1 entry with 3 links).
 
 **Review-wiring fields (add when known — cheap now, expensive to reconstruct later):**
 For any entry that could end up in a perf review, capture these at save time. Don't block on
@@ -380,7 +378,7 @@ review_worthy: achievement
 metrics:
   - <label>: <before> -> <after>
 links:
-  - https://github.com/Rippling/<repo>/pull/<number>
+  - https://github.com/<org>/<repo>/pull/<number>
 impact: "1–3 sentence why/what."
 ```
 
@@ -391,20 +389,20 @@ type: pr-batch
 date: YYYY-MM-DD
 tags: [tag-id, optional-second-tag]
 links:
-  - https://github.com/Rippling/<repo>/pull/<n1>
-  - https://github.com/Rippling/<repo>/pull/<n2>
+  - https://github.com/<org>/<repo>/pull/<n1>
+  - https://github.com/<org>/<repo>/pull/<n2>
 impact: |
   Multi-line description of the cluster of work.
 ```
 
-Doc entry (Confluence pages, tech specs, design docs — even outside Google Drive):
+Doc entry (wiki pages, tech specs, design docs — even outside Google Drive):
 ```yaml
 title: "<doc title or topic>"
 type: doc
 date: YYYY-MM-DD
 tags: [tag-id]
 links:
-  - https://rippling.atlassian.net/wiki/...
+  - https://<org>.atlassian.net/wiki/...
 impact: "Why the doc was written and what it covers."
 ```
 
@@ -422,7 +420,7 @@ narrative: |
 After saving PR entries, prompt the user for narratives. Present context from the week's activity to jog their memory:
 
 ```
-This week you worked on: [company-sharding (8 PRs), incident-response (3 PRs + dashboard), ...]
+This week you worked on: [<category-a> (8 PRs), incident-response (3 PRs + dashboard), ...]
 
 Any project wins, lessons, or reflections you want to capture?
 
@@ -463,19 +461,18 @@ slack_link: <original URL>
 
 ## Peer Recognition
 
-> **Vihari Muttineni**: "The T&A deferred fields engine is super tricky, and this change
-> required some serious thought and care..."
+> **<Name>**: "<exact quote>"
 
-> **Willy Xiao**: "This issue was responsible for all 3 incidents on the database in 2026."
+> **<Name>**: "<exact quote>"
 
 ## Engagement
 - 10 :rocket:, 9 :tada:, 1 :raised_hands:
 - 4 thread replies from leadership and peers
 
 ## Supporting Evidence
-- PR #182484: Switched timeclock reads to cached endpoint
-- PR #451532: Multiget write batching for compute_summary
-- Incidents resolved: #inc-2026-01-28, #inc-2026-02-09, #inc-2026-03-11
+- PR #<n>: <one-line summary>
+- PR #<n>: <one-line summary>
+- Incidents resolved: #inc-2026-01-28, #inc-2026-02-09
 ```
 
 #### Option 2: Guided Narrative
@@ -513,13 +510,13 @@ Single-week template:
 
 ## By Tag
 
-### deferred-field-refactor
-- PR #445495: Decompose deferred field engine (open, 2026-03-05)
-- PR #446416: Decompose _recomputeActiveDeferredFields (open, 2026-03-07)
-- Doc: Deferred Field Storage Redesign (2026-03-03)
+### <category-a>
+- PR #12345: <title> (open, 2026-03-05)
+- PR #12346: <title> (open, 2026-03-07)
+- Doc: <doc title> (2026-03-03)
 
-### company-sharding
-- PR #444291: Make company_id required in delete_time_entries_live (2026-03-06)
+### <category-b>
+- PR #12347: <title> (2026-03-06)
 - ...
 
 ## Untagged

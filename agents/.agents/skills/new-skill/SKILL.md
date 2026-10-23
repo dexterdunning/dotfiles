@@ -8,23 +8,25 @@ Create or register a **personal** skill in Dexter's shared skill home. Task: $AR
 
 ## Layout (do not reinvent)
 
-Canonical tree lives in the dotfiles stow package. `~/.agents` is a stow symlink for home-path compat.
+The canonical live discovery directory is the composed `~/.agents/skills` tree (public + private source skills linked together).
 
 | Role | Path |
 |------|------|
-| **Canonical** | `~/dotfiles/agents/.agents/skills/<name>/SKILL.md` |
-| Compat | `~/.agents` → `dotfiles/agents/.agents` (do not put harness links through this) |
+| **Canonical (live)** | `~/.agents/skills/<name>/SKILL.md` |
+| Public source | `~/dotfiles/agents/.agents/skills/<name>` |
+| Private source | `~/dotfiles-private/agents/skills/<name>` (workflows whose substance is internal) |
+| Private supplement | `~/dotfiles-private/agents/skill-overrides/<name>/instructions.md` → `~/.agents/skill-overrides/<name>/instructions.md` |
 | Cursor | `~/.cursor/skills/<name>` → **canonical dir** (one hop) |
 | Claude skills | `~/.claude/skills/<name>` → **canonical dir** |
 | Pi | `~/.pi/agent/skills/<name>` → **canonical dir** |
 | Claude `/` command (optional) | `~/.claude/commands/<name>.md` → **canonical `SKILL.md`** |
 
 Rules:
-- **Edit only the canonical copy.** Never fork content into harness dirs.
-- **Harness links target `~/dotfiles/agents/.agents/skills/<name>`, not `~/.agents/skills/<name>`.**
-- **Personal skills stay out of product repos** (not in `rippling-main/.claude/skills` unless intentionally team-shared).
+- **Edit only the canonical source** behind `~/.agents/skills/<name>` — never fork content into harness dirs or edit the composed link itself.
+- **Personal skills stay out of product repos** (not in a company repo's `.claude/skills` unless intentionally team-shared).
 - **Never** put personal skills in `~/.cursor/skills-cursor/` (Cursor-managed).
 - Name: lowercase, hyphens, max 64 chars. Match directory name = frontmatter `name` = command basename.
+- **Keep reusable workflows public.** Put internal examples, source locations, and company policy in a private supplement, not a duplicate skill body. The public skill must work without that supplement; add an explicit optional-read hook at its start. Local supplements cannot override repository policy or safety requirements.
 
 ## Workflow
 
@@ -38,7 +40,7 @@ From `$ARGUMENTS`, or ask once if missing:
 
 ### 2. Write the skill
 
-Create `~/dotfiles/agents/.agents/skills/<name>/SKILL.md`:
+Choose the public or private source tree based on audience. Create `<source>/skills/<name>/SKILL.md`, then run `python3 ~/dotfiles/setup-agents.py --private ~/dotfiles-private --omp-profile trial --apply` to expose it through `~/.agents/skills/<name>`. Omit `--private` and choose the appropriate profile on a public-only machine. Do not create a new real directory inside the composed discovery tree.
 
 ```markdown
 ---
@@ -57,9 +59,8 @@ Description must include WHAT + WHEN (third person). Keep the body short — onl
 
 ```bash
 NAME=<name>
-CANON="$HOME/dotfiles/agents/.agents/skills/$NAME"
-mkdir -p "$CANON"
-# SKILL.md must already exist at $CANON/SKILL.md
+CANON="$HOME/.agents/skills/$NAME"
+test -f "$CANON/SKILL.md" || { echo "Install the source skill with setup-agents.py first"; exit 1; }
 
 mkdir -p "$HOME/.cursor/skills" "$HOME/.claude/skills" "$HOME/.pi/agent/skills" "$HOME/.claude/commands"
 ln -sfn "$CANON" "$HOME/.cursor/skills/$NAME"
@@ -79,8 +80,8 @@ NAME=<name>
 readlink "$HOME/.cursor/skills/$NAME"
 readlink "$HOME/.claude/skills/$NAME"
 readlink "$HOME/.pi/agent/skills/$NAME"
-# Expect: .../dotfiles/agents/.agents/skills/$NAME  (not .../.agents/skills/...)
-test -f "$HOME/dotfiles/agents/.agents/skills/$NAME/SKILL.md" && head -6 "$HOME/dotfiles/agents/.agents/skills/$NAME/SKILL.md"
+# Expect: .../.agents/skills/$NAME
+test -f "$HOME/.agents/skills/$NAME/SKILL.md" && head -6 "$HOME/.agents/skills/$NAME/SKILL.md"
 ```
 
 Report: canonical path, which harnesses were linked, whether `/<name>` was wired.
@@ -89,7 +90,7 @@ Report: canonical path, which harnesses were linked, whether `/<name>` was wired
 
 If content already lives elsewhere (repo `.claude/skills`, a harness-local copy, a command-only file):
 
-1. Move (or copy-then-delete) into `~/dotfiles/agents/.agents/skills/<name>/SKILL.md`
+1. Move the skill into the appropriate public/private source tree, then rerun `setup-agents.py` to create its composed discovery entry.
 2. Run the symlink block above
 3. Delete the old copies so there is one source of truth
 
@@ -97,6 +98,5 @@ If content already lives elsewhere (repo `.claude/skills`, a harness-local copy,
 
 - Writing `SKILL.md` only under `~/.cursor/skills` or `~/.claude/skills`
 - Copying the same skill into multiple harness dirs
-- Harness links through `~/.agents` (extra hop) instead of `~/dotfiles/agents/.agents`
-- Committing personal skills into `rippling-main`
+- Writing new sources directly into the composed `~/.agents/skills` directory instead of the public/private source tree
 - Explaining this layout from scratch in chat instead of using this skill

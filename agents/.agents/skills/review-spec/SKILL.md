@@ -196,7 +196,7 @@ If the doc is too vague to review, say so and recommend `grill-me` or `dexter-pl
 ## Anti-patterns
 
 - Treating the checklist as a mandatory essay for every item — N/A freely when irrelevant
-- Demanding AWS/Lambda/Sev-2/ETL-lake artifacts for Rippling Django/Mongo/ETA designs
+- Demanding AWS/Lambda/Sev-2/ETL-lake artifacts for every Django/Mongo/async-worker design
 - Re-estimating story points
 - Rewriting a peer's spec unbidden
 - Style-only nits when Pass on substance

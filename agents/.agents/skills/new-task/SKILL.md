@@ -7,28 +7,32 @@ allowed-tools: Bash(*), Read(*), Grep(*), Glob(*)
 
 Create a new git worktree and branch for starting a task.
 
+> **Local supplement:** If `~/.agents/skill-overrides/new-task/instructions.md` exists, read
+> it for the local main-checkout path, worktree root, trunk branch, and branch prefixes.
+> This skill works without it; the supplement never overrides repository policy or safety rules.
+
 Arguments: $ARGUMENTS
 
 ## Instructions
 
-### Step 0: Refresh master in the main worktree
+### Step 0: Refresh the trunk branch in the main worktree
+Pull the trunk branch in the main checkout so the new branch is based on the latest. Skip cleanly if the trunk isn't checked out or the working tree is dirty — never disturb in-progress work.
 
-Pull master in the main worktree so the new branch is based on the latest. Skip cleanly if master isn't checked out or the working tree is dirty — never disturb in-progress work.
 
 ```bash
-cd /Users/dexter/projects/rippling-main
-if [ "$(git rev-parse --abbrev-ref HEAD)" = "master" ] \
+cd <main-checkout-path>
+if [ "$(git rev-parse --abbrev-ref HEAD)" = "<trunk-branch>" ] \
     && git diff --quiet && git diff --cached --quiet; then
-  git pull --ff-only origin master
+  git pull --ff-only origin <trunk-branch>
 else
-  echo "Skipping main-worktree master pull: HEAD=$(git rev-parse --abbrev-ref HEAD) or working tree dirty"
+  echo "Skipping main-worktree trunk pull: HEAD=$(git rev-parse --abbrev-ref HEAD) or working tree dirty"
 fi
 ```
 
 ### Step 1: Parse arguments
 
 Extract:
-- **branch name**: required, first argument. Must start with `dexter-`. If the user provides a name without the prefix, add it.
+- **branch name**: required, first argument. Read the repository's branch rules first and follow its required personal/agent prefix.
 - **base branch**: optional `--base <branch>`, defaults to `master`.
 
 If no arguments were provided, ask the user for a branch name.
@@ -42,10 +46,10 @@ If no arguments were provided, ask the user for a branch name.
    ```
 2. Check no worktree already exists at the target path:
    ```bash
-   ls /Users/dexter/projects/rippling-worktrees/<name>/
+   ls <worktree-root>/<name>/
    ```
 
-The worktree `<name>` is the branch name with the `dexter-` prefix stripped. For example, branch `dexter-fix-staleness-bug` gets worktree name `fix-staleness-bug` at `/Users/dexter/projects/rippling-worktrees/fix-staleness-bug`.
+The worktree `<name>` is the branch name with its required personal/agent prefix stripped. The local supplement names the worktree root and prefixes for this machine.
 
 If either exists, tell the user and ask how to proceed.
 
@@ -57,7 +61,7 @@ git worktree list
 ```
 
 **If `--base` is a non-trunk branch AND it's in an existing worktree** (stacking case):
-- The new branch must be created **in that same worktree** so `gs stack restack` and `gs stack submit` can switch between stacked branches.
+- The new branch must be created **in that same worktree**. Native GitHub stack branches stay together in one worktree.
 - Skip to Step 4a (Stack in existing worktree).
 
 **Otherwise** (base is `master`, or base branch isn't in any worktree):
@@ -65,18 +69,21 @@ git worktree list
 
 ### Step 4a: Stack in existing worktree
 
+Inspect the existing stack in that worktree. If it is remote-only, discover it with `gh stack checkout <base-PR-URL>` first. Verify the requested parent is the stack's top before adding:
+
 ```bash
 cd <base-branch-worktree-path>
-git fetch origin <base-branch>
-git checkout -b <branch-name>
-gs branch track --base <base-branch>
+gh stack view --short
+gh stack add <branch-name>
 ```
+
+Do not silently append above a different parent. If the parent is in the middle of a stack, ask about insertion/fork intent. For an unpublished untracked chain, create the child with `git switch --no-track -c <branch-name> <base-branch>`, then adopt the intended bottom-to-top branches with `gh stack init --base <trunk> <bottom> ... <branch-name>`.
 
 Report to the user:
 - Worktree path: `<base-branch-worktree-path>` (shared with stack)
 - Branch: `<branch-name>`
 - Based on: `<base-branch>`
-- git-spice: tracked, stacked
+- Local stack: layer added; native GitHub membership is created/verified during PR publication
 
 Then use that worktree path as the working directory for all subsequent commands in the session.
 
@@ -84,25 +91,20 @@ Then use that worktree path as the working directory for all subsequent commands
 
 ```bash
 git fetch origin <base-branch>
-git worktree add -b <branch-name> /Users/dexter/projects/rippling-worktrees/<name> origin/<base-branch>
-# Clear the auto-set upstream — `git worktree add ... origin/<base>` makes
-# the new branch track origin/<base>, which causes `gs branch submit` to
-# push to <base> instead of creating its own remote branch.
-git -C /Users/dexter/projects/rippling-worktrees/<name> branch --unset-upstream
+git worktree add --detach <worktree-root>/<name> origin/<base-branch>
+git -C <worktree-root>/<name> switch --no-track -c <branch-name>
 ```
 
-Then initialize git-spice tracking:
-```bash
-cd /Users/dexter/projects/rippling-worktrees/<name>
-gs repo init --trunk=master --remote=origin 2>/dev/null || true
-gs branch track --base <base-branch>
-```
+Do not set the base as the branch's upstream. When the branch is ready to publish,
+push its own remote branch with `git push -u origin <branch-name>`. If this becomes
+a multi-branch stack, use `gh stack init --base master <bottom> <upper> [...]` or
+`gh stack add <branch>`; see `create-stacked-pr` for the repository-safe PR flow.
 
 Report to the user:
-- Worktree path: `/Users/dexter/projects/rippling-worktrees/<name>`
+- Worktree path: `<worktree-root>/<name>`
 - Branch: `<branch-name>`
 - Based on: `<base-branch>`
-- git-spice: tracked
+- Upstream: none until the branch is pushed to its own remote name
 
 Then use that worktree path as the working directory for all subsequent commands in the session.
 
@@ -112,5 +114,5 @@ Show the current state:
 ```bash
 git log --oneline -5
 git status
-gs log short 2>/dev/null || true
+gh stack view --short 2>/dev/null || true
 ```

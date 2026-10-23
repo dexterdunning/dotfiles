@@ -1,15 +1,16 @@
 ---
 name: slack-draft
-description: Draft a Slack message in Dexter's voice. Use when asked to draft or write a Slack message, post in a channel, or reply to a thread.
+description: Draft a Slack message in the user's voice. Use when asked to draft or write a Slack message, post in a channel, or reply to a thread.
 argument-hint: "[channel-url-or-thread] [message-context]"
 ---
 
 Draft a Slack message for the user. The task: $ARGUMENTS
 
+**Optional local supplement:** if `~/.agents/skill-overrides/slack-draft/instructions.md` exists, read it first — it carries the exact style-source path, voice samples, and destination overrides. Without it, use the calibration below with a user-provided style source.
+
 ## Style Calibration
 
-Read the user's Slack writing style from memory at:
-`~/.claude/projects/-Users-dexter-projects-rippling-main/memory/user_slack_writing_style.md`
+Read the user's Slack writing style from memory at the configured style-source path (see supplement above; otherwise ask the user for a sample or file of their writing).
 
 If the user specifies a formality level, adjust accordingly:
 

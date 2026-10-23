@@ -1,5 +1,4 @@
 {
-  "model": "llm-gateway-openai/gpt-4.1-mini",
   "apply": {
     "terminalTitle": true,
     "sessionName": true,

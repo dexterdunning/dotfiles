@@ -16,7 +16,7 @@
 
 | | |
 | --- | --- |
-| Path | `/Users/dexter/projects/rippling-worktrees/<name>` |
+| Path | `<worktree-root>/<name>` |
 | Branch | `<branch-name>` |
 | Base | `origin/master` — restacked YYYY-MM-DD |
 | Open PRs | [#NNNN](url) → base `master` |
@@ -30,7 +30,7 @@
 | [implementation-detail.md](../../implementation-detail.md) | Canonical engineering detail (if present) |
 | [NN+1-*.md](...) | Next PR — **do not implement yet** |
 
-Plan root: `~/projects/docs/tech-specs/<feature-name>/`
+Plan root: `<plan-root>/<feature-name>/` (see local supplement for the default)
 
 ## Closed alignment decisions (do not relitigate)
 
@@ -54,7 +54,10 @@ Plan root: `~/projects/docs/tech-specs/<feature-name>/`
 ## Tests
 
 ```bash
-CDE_CLI_CONFIG_RIPPLING_MAIN_DIR=<worktree-path> cde local test <test-path>
+# Use the repository's test command; e.g. a repo-provided test runner invoked with
+# the worktree path and the app-relative test path. See local supplement for the
+# exact command this repo uses.
+<repo-test-command> <worktree-path> <test-path>
 ```
 
 ## Copy-paste: pairing session (fresh chat)
@@ -63,9 +66,9 @@ CDE_CLI_CONFIG_RIPPLING_MAIN_DIR=<worktree-path> cde local test <test-path>
 Continue [FEATURE] — [sub-PR]. Use @incremental-feature-stack pairing rules.
 
 Read first:
-1. ~/projects/docs/tech-specs/<feature>/plan/pr/NN-session-handoff.md
-2. ~/projects/docs/tech-specs/<feature>/plan/pr/NN-implementation-steps.md
-3. ~/projects/docs/tech-specs/<feature>/plan/pr/NN-<contract>.md
+1. <plan-root>/<feature>/plan/pr/NN-session-handoff.md
+2. <plan-root>/<feature>/plan/pr/NN-implementation-steps.md
+3. <plan-root>/<feature>/plan/pr/NN-<contract>.md
 
 Worktree: <path>
 Branch: <branch>
@@ -83,7 +86,7 @@ Go step <N>.
 ```text
 Ship [FEATURE] [sub-PR stack]. @incremental-feature-stack + dexter-pr-workflow.
 
-Handoff: ~/projects/docs/tech-specs/<feature>/plan/pr/NN-session-handoff.md
+Handoff: <plan-root>/<feature>/plan/pr/NN-session-handoff.md
 Branches: <list bottom to top>
 Action: rebase on origin/master, push, open/update stacked PRs
 ```

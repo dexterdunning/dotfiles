@@ -12,6 +12,9 @@ description: >-
 
 Build large features as a **documented PR stack** with **atomic implementation
 steps**. Any agent can cold-start from the handoff — no chat history required.
+> **Local supplement:** If `~/.agents/skill-overrides/incremental-feature-stack/instructions.md`
+> exists, read it for local plan-doc locations and repo-specific conventions. This skill
+> works without it; the supplement never overrides repository policy or safety rules.
 
 ## Session types (jump in / out freely)
 
@@ -20,7 +23,7 @@ steps**. Any agent can cold-start from the handoff — no chat history required.
 | **Planning** | Decompose feature → PR stack → steps | Existing design docs, module guidance | `overview`, PR contracts, `implementation-steps`, `session-handoff` |
 | **Pairing** | Implement **one** approved step | `session-handoff` → `implementation-steps` → PR contract | Code diff (uncommitted until user approves); session log on commit |
 | **Review** | Neovim `/review-comments` or design Q&A | Current diff + contract | Code fixes; no commit unless user asks |
-| **Ship** | Rebase, split PRs, push, open/update PRs | Handoff branches + `gs log` | Handoff PR URLs; use `dexter-pr-workflow` |
+| **Ship** | Rebase, split PRs, push, open/update PRs | Handoff branches + `gh stack view --short` | Handoff PR URLs; use `create-stacked-pr` |
 
 **Rule:** Progress lives in **files**, not conversation. End every session by
 updating `session-handoff.md` (see [Session exit checklist](#session-exit-checklist)).
@@ -30,10 +33,12 @@ trust the session log over user memory.
 
 ## Where artifacts live
 
-Default (Rippling large features):
+Keep plan docs **outside the worktree** so they survive worktree cleanup. Choose a
+stable plan root (for example a personal docs/tech-specs directory; check the local
+supplement for the default) and record it in the session handoff:
 
 ```text
-~/projects/docs/tech-specs/<feature-name>/
+<plan-root>/<feature-name>/
   plan/
     overview.md
     pr/
@@ -43,8 +48,7 @@ Default (Rippling large features):
       NN-session-handoff.md
 ```
 
-Keep plan docs **outside the worktree** so they survive worktree cleanup. Link
-worktree path and branch names in handoff only.
+Link worktree path and branch names in handoff only.
 
 Use [templates/](templates/) when bootstrapping a new feature.
 
@@ -135,11 +139,11 @@ Can be same or different chat. No implementation-steps change unless code change
 
 Use with `dexter-pr-workflow` and `dexter-worktree-workflow`.
 
-1. `git fetch origin master` → rebase stack from bottom up
-2. If splitting mid-flight: cut branches at semantic commits; `gs branch track`
-3. Force-push only when user approved restack
-4. Open stacked PRs bottom-up; link in handoff
-5. Update handoff: PR URLs, `session_state: shipped` or `implementing` (if more steps)
+1. Keep all stack branches in one worktree; inspect with `gh stack view --short`
+2. If splitting mid-flight, cut semantic branches with no upstream tracking, then adopt them with `gh stack init --base master <bottom> <upper> [...]` or add a layer with `gh stack add <branch>`
+3. Rebase with `gh stack rebase` and push with `gh stack push` only when the user approves rewriting published branches
+4. Create/update PRs bottom-up through repository-required flows, then link existing PR URLs into the native stack; follow `create-stacked-pr`
+5. Update handoff: native stack number, ordered PR URLs, `session_state: shipped` or `implementing` (if more steps)
 
 ## Session exit checklist
 
@@ -168,7 +172,7 @@ Plan a multi-PR feature stack using @incremental-feature-stack.
 
 Feature: [name]
 Design context: [paths or brief]
-Worktree will be: ~/projects/rippling-worktrees/[name]
+Worktree will be: <worktree-root>/[name]
 
 Deliver:
 - plan/overview.md + plan/pr/README.md
@@ -205,7 +209,7 @@ Go step [N].
 Ship [FEATURE] stack using @incremental-feature-stack + dexter-pr-workflow.
 
 Read: [path]/NN-session-handoff.md
-Action: rebase on origin/master, [split if needed], push, open/update stacked PRs
+Action: use native `gh stack` to rebase, [split if needed], push, create/update PRs through repository rules, and link existing PR URLs
 Branches: [list]
 ```
 
@@ -223,14 +227,15 @@ Do not implement until I confirm.
 
 | Skill | When |
 | --- | --- |
-| `dexter-worktree-workflow` | Create worktree, `gs branch track` |
-| `dexter-pr-workflow` | PR template, labels, stack submit |
+| `new-task` | Create a worktree or add a branch in the stack's existing worktree |
+| `create-stacked-pr` | Repository PR flow, native stack linking, labels, and verification |
 | `review-comments` | Neovim review between steps |
 
 ## Reference example
 
-See [examples/deferred-field-funnel.md](examples/deferred-field-funnel.md) — the
-funnel PR4 stack (4a → 4b-1 → 4b-2 → 4b-3) that motivated this skill.
+A local supplement may provide a worked example covering plan docs, a step table,
+mid-flight splits, and shipped PRs. Follow its example reference when available;
+the public workflow and templates are complete without it.
 
 ## Templates
 

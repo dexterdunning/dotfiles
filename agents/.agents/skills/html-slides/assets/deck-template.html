@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Background jobs — illustrative example</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reveal.css">
+  <style>
+    :root {
+      --slide-bg: #F7F6F2;
+      --slide-surface: #FFFFFF;
+      --slide-surface2: #EEECEA;
+      --slide-yellow: #FAD000;
+      --slide-black: #0C0B09;
+      --slide-muted: #6B6A64;
+      --slide-berry: #7B3FA0;
+      --slide-green: #1A8A45;
+      --slide-red: #C0392B;
+      --slide-border: rgba(12, 11, 9, 0.12);
+    }
+    body { background: var(--slide-bg); }
+    .reveal {
+      font-family: "Basel Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 26px;
+      background: var(--slide-bg);
+      color: var(--slide-black);
+    }
+    .reveal .slides { text-align: left; }
+    .slide-content { box-sizing: border-box; width: 1280px; height: 720px; padding: 42px 60px 46px; }
+    .hero { display: flex; flex-direction: column; justify-content: center; border-left: 8px solid var(--slide-yellow); }
+    .section-intro { display: flex; flex-direction: column; justify-content: center; }
+    .reveal h1 { font-size: 68px; line-height: 1.08; letter-spacing: -1.5px; margin: 16px 0 24px; }
+    .reveal h2 { font-size: 46px; line-height: 1.15; letter-spacing: -0.8px; margin: 0 0 28px; }
+    .reveal h3 { font-size: 28px; line-height: 1.25; margin: 0 0 16px; }
+    .reveal p, .reveal li { font-size: 26px; line-height: 1.4; margin: 0 0 18px; }
+    .reveal ul { margin: 0; padding-left: 30px; }
+    .reveal li { padding-left: 6px; }
+    .reveal .eyebrow, .reveal .caption, .reveal .badge { font-size: 22px; line-height: 1.4; }
+    .eyebrow { font-weight: 600; letter-spacing: 2px; text-transform: uppercase; }
+    .muted, .caption { color: var(--slide-muted); }
+    .badge { display: inline-block; padding: 6px 14px; border-radius: 8px; background: var(--slide-surface2); }
+    .badge.focus { color: var(--slide-black); background: var(--slide-yellow); }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; }
+    .two-col > * { min-width: 0; }
+    .panel { padding: 28px; border: 1px solid var(--slide-border); border-radius: 12px; background: var(--slide-surface); }
+    .callout { padding: 22px 28px; border-left: 5px solid var(--slide-yellow); background: var(--slide-surface); }
+    .reveal table { width: 100%; border-collapse: collapse; table-layout: fixed; background: var(--slide-surface); }
+    .reveal th { font-size: 22px; background: var(--slide-surface2); text-align: left; }
+    .reveal td { font-size: 24px; }
+    .reveal th, .reveal td { padding: 18px; line-height: 1.4; border-bottom: 1px solid var(--slide-border); overflow-wrap: anywhere; }
+    .reveal code { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 24px; }
+    .reveal pre { box-sizing: border-box; width: 100%; margin: 0; padding: 24px; border-radius: 10px; background: #1A1815; color: #F7F6F2; }
+    .reveal pre code { display: block; font-size: 22px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .reveal a { color: var(--slide-black); text-decoration: underline; text-decoration-color: var(--slide-muted); }
+    .reveal svg { display: block; width: 100%; }
+    .reveal svg text { font-family: "Basel Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif; fill: var(--slide-black); }
+    .reveal .fragment.highlight-current-yellow { opacity: 1; visibility: inherit; }
+    .reveal .fragment.highlight-current-yellow.current-fragment { background: var(--slide-yellow); color: var(--slide-black); }
+    .reveal .progress { color: var(--slide-yellow); height: 4px; }
+    .reveal .controls { color: var(--slide-black); }
+    .reveal .slide-number { left: 20px; right: auto; bottom: 16px; font-family: inherit; font-size: 22px; color: var(--slide-muted); background: var(--slide-bg); }
+    .view-link { position: fixed; top: 12px; right: 20px; z-index: 30; padding: 8px 14px; border: 1px solid var(--slide-border); border-radius: 8px; background: var(--slide-bg); color: var(--slide-black); font: 16px "Helvetica Neue", Helvetica, Arial, sans-serif; }
+    @media print { .view-link { display: none; } }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal *, .reveal *::before, .reveal *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="view-link" id="view-link" href="?view=scroll">Reading view</a>
+  <div class="reveal">
+    <div class="slides">
+      <!-- Illustrative system; replace the content for the actual presentation. -->
+      <section id="background-jobs">
+        <div class="slide-content hero">
+          <p class="eyebrow muted">Engineering handoff</p>
+          <h1>Background jobs</h1>
+          <p>How queued work runs and what happens when a job is delivered again.</p>
+          <p class="caption">Illustrative architecture and code, not a production-system reference.</p>
+        </div>
+      </section>
+      <section id="execution-intro">
+        <div class="slide-content section-intro">
+          <p class="eyebrow muted">Part 1</p>
+          <h2>Execution</h2>
+          <p>The queue holds pending work. A worker executes each delivery.</p>
+          <ul>
+            <li>Where work waits and where the change is stored.</li>
+            <li>How a repeated delivery is handled.</li>
+          </ul>
+        </div>
+      </section>
+      <section id="execution-flow">
+        <div class="slide-content">
+          <p class="eyebrow muted">Execution</p>
+          <h2>Request to stored result</h2>
+          <svg viewBox="0 0 1136 300" role="img" aria-labelledby="flow-title flow-desc">
+            <title id="flow-title">Request, queue, worker and storage</title>
+            <desc id="flow-desc">A request enqueues a job. The queue delivers it to a worker, which writes the result to storage.</desc>
+            <defs>
+              <marker id="flow-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                <path d="M0,0 L10,5 L0,10 Z" fill="#0C0B09"></path>
+              </marker>
+            </defs>
+            <rect x="20" y="136" width="196" height="100" rx="12" fill="#FFFFFF" stroke="#6B6A64"></rect>
+            <text x="118" y="196" font-size="28" text-anchor="middle">Request</text>
+            <path d="M216,186 H304" stroke="#0C0B09" stroke-width="3" marker-end="url(#flow-arrow)"></path>
+            <text x="260" y="120" font-size="22" text-anchor="middle">enqueue</text>
+            <rect x="320" y="136" width="196" height="100" rx="12" fill="#FAD000" stroke="#6B6A64"></rect>
+            <text x="418" y="196" font-size="28" text-anchor="middle">Queue</text>
+            <path d="M516,186 H604" stroke="#0C0B09" stroke-width="3" marker-end="url(#flow-arrow)"></path>
+            <text x="560" y="120" font-size="22" text-anchor="middle">deliver</text>
+            <rect x="620" y="136" width="196" height="100" rx="12" fill="#FFFFFF" stroke="#6B6A64"></rect>
+            <text x="718" y="196" font-size="28" text-anchor="middle">Worker</text>
+            <path d="M816,186 H904" stroke="#0C0B09" stroke-width="3" marker-end="url(#flow-arrow)"></path>
+            <text x="860" y="120" font-size="22" text-anchor="middle">write</text>
+            <rect x="920" y="136" width="196" height="100" rx="12" fill="#FFFFFF" stroke="#6B6A64"></rect>
+            <text x="1018" y="196" font-size="28" text-anchor="middle">Storage</text>
+          </svg>
+          <p class="callout">The request can return after enqueueing. The stored result becomes available after the worker finishes.</p>
+        </div>
+      </section>
+      <section id="retry-handling">
+        <div class="slide-content">
+          <p class="eyebrow muted">Execution</p>
+          <h2>Retry handling</h2>
+          <p>A delivery can repeat if the queue does not receive the worker's acknowledgement.</p>
+          <pre><code>def handle(job: Job) -&gt; None:
+    apply_change(job.payload, idempotency_key=job.id)</code></pre>
+          <p class="caption" style="margin-top: 24px;">Illustrative API: storage saves the key and change atomically. A repeated key returns the existing result.</p>
+        </div>
+      </section>
+      <section id="lost-acknowledgement">
+        <div class="slide-content">
+          <p class="eyebrow muted">Illustrative case</p>
+          <h2>Lost acknowledgement</h2>
+          <table>
+            <thead><tr><th style="width: 28%;">Event</th><th>What happens</th></tr></thead>
+            <tbody>
+              <tr><td>First delivery</td><td>The worker stores the change and job key together.</td></tr>
+              <tr><td>Acknowledgement lost</td><td>The queue delivers the same job again.</td></tr>
+              <tr><td>Second delivery</td><td>Storage recognizes the key and returns the existing result.</td></tr>
+            </tbody>
+          </table>
+          <p class="callout" style="margin-top: 24px;"><span class="fragment highlight-current-yellow">Outcome: one stored change after two deliveries.</span></p>
+        </div>
+      </section>
+    </div>
+  </div>
+  <noscript>This presentation requires JavaScript. Its slide content is included in this HTML file.</noscript>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reveal.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const reading = params.get('view') === 'scroll';
+    const viewLink = document.getElementById('view-link');
+    const updateViewLink = () => {
+      const otherView = new URL(location.href);
+      const inScrollView = Reveal.isScrollView();
+      otherView.searchParams.set('view', inScrollView ? 'slide' : 'scroll');
+      viewLink.href = otherView.href;
+      viewLink.textContent = inScrollView ? 'Slides view' : 'Reading view';
+    };
+    viewLink.addEventListener('click', updateViewLink);
+    Reveal.on('ready', updateViewLink);
+    Reveal.on('slidechanged', updateViewLink);
+    Reveal.initialize({
+      width: 1280,
+      height: 720,
+      margin: 0.08,
+      center: false,
+      hash: true,
+      controls: true,
+      progress: true,
+      slideNumber: 'c/t',
+      transition: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'none' : 'fade',
+      view: reading ? 'scroll' : 'slide',
+      scrollProgress: true,
+      scrollSnap: 'proximity',
+      plugins: []
+    });
+  </script>
+</body>
+</html>

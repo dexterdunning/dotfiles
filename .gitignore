@@ -9,3 +9,20 @@ agents/.agents/skills/launchdarkly-flag-command/
 **/*ada
 **/*brazil
 **/node_modules/
+
+# Agent credentials and generated/local configuration must stay outside this repo.
+private/
+dotfiles-private/
+**/auth.json
+**/mcp.json
+**/mcp-oauth/
+**/sessions/
+**/logs/
+**/cache/
+**/*.db
+**/*.db-shm
+**/*.db-wal
+**/.env
+**/.env.*
+!**/.env.example
+**/*.zip

@@ -1,0 +1,44 @@
+{
+  "defaultThinkingLevel": "medium",
+  "compaction": {
+    "enabled": true,
+    "midTurnEnabled": true,
+    "thresholdTokens": 180000,
+    "keepRecentTokens": 16000,
+    "methodOrder": ["shake", "soft"],
+    "asyncEnabled": false,
+    "idleEnabled": false,
+    "autoContinue": false
+  },
+  "task": {
+    "eager": "default",
+    "structured": true,
+    "speculativeLaunch": false,
+    "maxConcurrency": 2,
+    "maxRecursionDepth": 1,
+    "maxRuntimeMs": 1800000,
+    "softRequestBudget": 40,
+    "completionProbe": false,
+    "enableEffort": true,
+    "maxEffort": "medium",
+    "prewalk": false
+  },
+  "providers": {"cacheWarming": "off"},
+  "advisor": {"enabled": false},
+  "prewalk": {"enabled": false},
+  "async": {"widgets": false},
+  "memory": {"backend": "off"},
+  "autolearn": {"enabled": false, "autoContinue": false},
+  "read": {"defaultLimit": 200, "summarize": {"enabled": true}},
+  "tools": {"approvalMode": "always-ask", "outputMaxColumns": 512},
+  "mcp": {"enableProjectConfig": false},
+  "skills": {
+    "enabled": true,
+    "enableSkillCommands": true,
+    "enableAgentsUser": true,
+    "enablePiUser": false,
+    "includeSkills": []
+  },
+  "tui": {"vimMode": true, "vimModeDisplay": "icon"},
+  "dev": {"autoqaConsent": "denied"}
+}

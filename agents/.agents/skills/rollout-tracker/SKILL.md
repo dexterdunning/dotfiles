@@ -6,6 +6,8 @@ argument-hint: "[init|status|checkpoint|note|compare|bump|ld|list] [slug|descrip
 
 Maintain living rollout trackers under `~/projects/rollouts/`. Cross-session memory for gradual flag/PR rollouts — not a substitute for `docs/` investigations or the wiki.
 
+If `~/.agents/skill-overrides/rollout-tracker/instructions.md` exists, read it for local audit sources, metrics, and measurement traps. Without it, use available authorized integrations and the generic procedure below. Local supplements do not override repository policy or safety requirements.
+
 ## Layout
 
 ```
@@ -18,7 +20,7 @@ Maintain living rollout trackers under `~/projects/rollouts/`. Cross-session mem
     checkpoints/        # optional dated snapshots YYYY-MM-DD.md
 ```
 
-Slug: lowercase hyphens, stable (e.g. `df-funnel-task-id-polling`).
+Slug: lowercase hyphens, stable (e.g. `background-worker-rollout`).
 
 ## Modes (`$ARGUMENTS`)
 
@@ -45,7 +47,7 @@ slug: <slug>
 status: active | paused | done | rolled-back
 updated: YYYY-MM-DD
 flag: <LD flag key>
-flag_shape: <JSON keys that matter, e.g. use_task_id_for_polling>
+flag_shape: <JSON keys that matter for this rollout>
 prs: [<urls>]
 dashboard: <url>
 related_docs: [<~/projects/docs/...>]
@@ -86,7 +88,7 @@ One query per block with: purpose, time-window advice (e.g. "≤20m windows for 
 
 ## LaunchDarkly targeting history
 
-**Prefer Datadog events over the LaunchDarkly MCP.** The LD MCP often fails auth/load; Rippling mirrors flag audits into Datadog via the LaunchDarkly integration.
+Use the flag provider's authorized audit API, or Datadog events when the organization's LaunchDarkly integration mirrors flag audits there. Verify that the source exists before relying on it; do not assume MCP availability or a Datadog mirror. The query below applies to the mirrored-events case.
 
 ```bash
 pup --no-agent events search \
@@ -139,16 +141,16 @@ Correlate metric windows to these timestamps (e.g. variation JSON flip vs % bump
 
 ### compare
 
-Same clock window vs a baseline day (default: last Friday, or TRACKER-stated baseline). State windows in PDT + UTC. Call out population mismatches (e.g. TEPPS starts ≠ funnel joins while partially rolled out). Align windows to **LD targeting log** so % / variation changes aren't mis-attributed.
+Same clock window vs a baseline day (default: last Friday, or TRACKER-stated baseline). State windows with the relevant local timezone and UTC. Call out population mismatches (e.g. all worker starts versus only enabled-cohort joins while partially rolled out). Align windows to **LD targeting log** so % / variation changes aren't mis-attributed.
 
 ### bump
 
-Answer: safe to dial up? Use Capacity + guardrails + primary signals. For ETA workers, **zoom ≤20m** on `rippling_jobs.inflight` — day-scale rollups hide peaks. Compare peak to namespace / `max_funnel_concurrency` caps. Refresh LD first so "current %" is accurate.
+Answer: safe to dial up? Use Capacity + guardrails + primary signals. For worker concurrency, inspect short windows (for example ≤20m) of the rollout's inflight metric: day-scale rollups hide peaks. Compare observed peaks with the applicable queue/namespace/concurrency limits. Refresh targeting history first so "current %" is accurate. A readiness assessment does not authorize changing the flag.
 
 ### ld
 
 1. Read flag key from TRACKER frontmatter (or `$ARGUMENTS`).
-2. Pull Datadog LD events (query above).
+2. Pull the available authorized audit source; use the Datadog query above only when the mirror is configured.
 3. Update **LD targeting log**, **Rollout plan**, `ld-history.json`, and `queries.md`.
 4. Add a Findings bullet only if something new since last sync.
 
@@ -162,13 +164,13 @@ Append a dated Findings bullet (and Gotchas if it's a measurement trap). No mand
 - **Update the tracker before ending** a substantive rollout turn (at least Findings or a checkpoint).
 - Link related `~/projects/docs/...` and wiki pages; don't duplicate sizing studies into the tracker.
 - Canvases are ephemeral UI — durable numbers belong in TRACKER/checkpoints.
-- Personal store only (`~/projects/rollouts`). Not rippling-main.
+- Personal store only (`~/projects/rollouts`), unless the user selects another destination. Do not write personal trackers into a product repository.
 
 ## Anti-patterns
 
-- Treating partial-rollout ratios (TEPPS:compute, etc.) as dedupe/coalesce proof
+- Treating partial-rollout ratios between different populations as dedupe/coalesce proof
 - Trusting coarse rollups for concurrency peaks
 - Equating imperfect proxy formulas with ground truth without a Gotchas note
 - Creating a new tracker when `list` already has the slug
-- Blocking on LaunchDarkly MCP when Datadog `source:launchdarkly` events already have the audit
+- Blocking on one integration when an equivalent authorized audit source is available
 - Attributing metric shifts to the wrong LD event (variation JSON vs % rollout vs individual target)

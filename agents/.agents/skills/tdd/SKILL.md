@@ -6,6 +6,8 @@ argument-hint: [feature or behavior to implement]
 
 # Test-Driven Development
 
+If `~/.agents/skill-overrides/tdd/instructions.md` exists, read it for local test runners, flag configuration, and mock helpers. Otherwise use the workflow below with repository-provided equivalents. Local supplements do not override repository policy or safety requirements.
+
 Build features and refactors test-first, using this codebase's patterns for decomposition, safety, and verification.
 
 ## Philosophy
@@ -105,12 +107,12 @@ Gate the new path so it can be enabled incrementally:
 
 ```python
 def _getValueForField(self, ...):
-    if is_enabled("tanda-deferred-field-engine-v2", company):
+    if is_enabled("field-engine-v2", company):
         return self._getValueForFieldV2(...)
     # original V1 logic untouched
 ```
 
-Default the flag to `true` in `default_test_feature_flags_val.json` so CI exercises V2.
+Configure the repository's test feature flags so CI exercises V2; use the local supplement for any repository-specific flag-default file.
 
 ### Parity testing
 

@@ -7,6 +7,8 @@ allowed-tools: Bash(*), Read(*), Grep(*), Glob(*), Write(*), Edit(*), AskUserQue
 
 Generate a short monthly brag doc for manager 1:1s. This is **not** a perf review packet — use `/worklog-summary` for that.
 
+**Optional local supplement:** if `~/.agents/skill-overrides/worklog-brag/instructions.md` exists, read it first — it carries the org's repos, team names, channels, career-ladder paths, and config specifics. Without it, this workflow works with `~/.worklog/config.yaml` and user-provided sources.
+
 **Why interview rounds matter:** Platform data disappears. Slack thread context and file URLs expire. Datadog log detail ages out. GitHub review *discussions* get buried. Monthly brag is often the **last chance** to capture recognition quotes, before/after metrics, and invisible work before it's gone. **Do not skip interview rounds** unless the user passes `--quick`.
 
 **Relationship to other worklog commands:**
@@ -60,7 +62,7 @@ Read in parallel for `[first_day, last_day]`:
 4. Entries tagged `career-growth` or type `doc`
 5. High-signal entries without narratives — **flag as thin evidence**
 
-**Exclude:** FF cleanup PRs, routine opens, duplicates from prior month unless materially progressed.
+**Exclude:** flag-cleanup PRs, routine opens, duplicates from prior month unless materially progressed.
 
 **Tone:** outcome-first, one line per bullet. Metrics beat PR numbers.
 
@@ -76,7 +78,7 @@ Before drafting, produce an internal gap list. This drives interview rounds.
 | **No recognition** | Zero peer quotes in month | Slack thread replies expire |
 | **No career-growth** | Zero `career-growth` tag entries | Mentoring/interviews invisible |
 | **Empty impact** | Entry has title but no/minimal `impact:` | User memory fades |
-| **Incident without retro** | `incident-response` entries, no matching narrative | INC channel context lost |
+| **Incident without retro** | `incident-response` entries, no matching narrative | Incident channel context lost |
 | **Rollout unvalidated** | Entry mentions FF rollout, no follow-up metric | Datadog dashboard snapshots expire |
 
 Print gap summary to user before interview:
@@ -84,7 +86,7 @@ Print gap summary to user before interview:
 ```
 Gap inventory for June 2026:
 - 3 weeks without narrative (W22, W23, W25)
-- Heavy PR volume, no story: make-deferred-fields-async (9 entries)
+- Heavy PR volume, no story: <project-slug> (9 entries)
 - No peer recognition captured
 - No career-growth entries (mentoring/interviews?)
 - 2 incidents without retro narrative
@@ -96,7 +98,7 @@ Attempt to **recover expiring data** from platforms while still available. Run w
 
 #### 5a: Slack (if MCP available)
 
-> Check whether `mcp__claude_ai_Slack__slack_search_public_and_private` is available. If not, note "Slack unavailable" and **elevate interview priority** for recognition quotes.
+> Check whether a `slack_search_public_and_private`-suffixed tool is available. If not, note "Slack unavailable" and **elevate interview priority** for recognition quotes.
 
 If available, search the month:
 ```
@@ -108,7 +110,7 @@ For each gap cluster (incidents, big threads, wins):
 - Extract metrics the user posted in Slack (before/after numbers)
 - Save candidate quotes to draft — **do not wait for user** if clearly brag-worthy
 
-Also search incident channels user participated in (`inc-`, `#proj-` from gap list).
+Also search incident/project channels the user participated in (from the gap list).
 
 **Slack retention note:** File/image URLs expire; capture quote *text* and attributor name into the brag doc now. Note file IDs in source coverage if charts were attached.
 
@@ -117,7 +119,7 @@ Also search incident channels user participated in (`inc-`, `#proj-` from gap li
 For thin-evidence tags, recover merged PR titles and dates the month may have missed in worklog:
 
 ```bash
-gh pr list --repo Rippling/rippling-main --author <github_user> \
+gh pr list --repo <org>/<repo> --author <github_user> \
   --state merged --search "merged:YYYY-MM-01..YYYY-MM-31" \
   --json number,title,mergedAt --limit 50
 ```
@@ -211,7 +213,7 @@ I don't have peer or manager recognition captured for <month>.
 
 - Any Slack threads, 1:1 feedback, or review comments worth preserving? (exact quotes help)
 - Anyone call out your work in incidents or launch channels?
-- Any reactions/feedback on the write-conflict-style announcements?
+- Any reactions/feedback on the announcements you drove?
 ```
 
 If user pastes a Slack link → offer inline capture (read thread if MCP available) and add quote to doc.
@@ -222,7 +224,7 @@ If user pastes a Slack link → offer inline capture (read thread if MCP availab
 Worklog won't show these — what happened in <month>?
 
 - Mentoring or pairing?
-- Interviews conducted or trained for? (You're certified — any loops run?)
+- Interviews conducted or trained for?
 - Substantive code/design reviews that shaped someone else's work?
 - Docs, presentations, or design influence outside merged PRs?
 - Cross-team unblockings that weren't yours to ship?
@@ -231,8 +233,8 @@ Worklog won't show these — what happened in <month>?
 #### Round 4 — Cross-team & visibility (required if gap inventory shows incidents or multi-repo work)
 
 ```
-- Which teams did you coordinate with (kiosk, mobile, HRIS, infra, PM)?
-- Did you drive any timelines or decisions outside T&A?
+- Which teams did you coordinate with?
+- Did you drive any timelines or decisions outside your primary area?
 - Anything your manager should know about scope or dependencies?
 ```
 
@@ -300,17 +302,17 @@ Tell the user when relevant — this motivates interview rounds:
 
 **Thin evidence → interview → highlight:**
 
-Gap: 9 entries on `make-deferred-fields-async`, no narrative  
-Round 1 answer: "DEO jitter at 100%, p95 queue wait 7min → 3min"  
-→ Highlight: `Rolled out DEO fanout ETA jitter — p95 queue wait ~7 min → ~3 min; eliminated recurring 07:00 enqueue peak.`
+Gap: 9 entries on a project tag, no narrative<br>
+Round 1 answer: "saturation at 100%, p95 queue wait 7min → 3min"<br>
+→ Highlight: `Rolled out ETA fanout jitter — p95 queue wait ~7 min → ~3 min; eliminated recurring enqueue peak.`
 
 **Recognition recovery from Slack:**
 
-Search finds Vihari reply on incident thread  
-→ Recognition: `"Dexter fixed the naive regeneration issue" — Vihari Muttineni (INC-3122 RCA)`
+Search finds a peer reply on incident thread<br>
+→ Recognition: `"<what the peer said>" — <Peer Name> (<INC-XXXX RCA>)`
 
 ## Notes
 
 - Default: **previous month**, run in first week of new month while memory + Slack recovery still work.
-- Complements `~/projects/docs/career-ladder/` — brag doc feeds manager review spreadsheet.
+- Complements local career-ladder/progression docs, if present — brag doc feeds manager review spreadsheet.
 - If month is completely empty, suggest running `/worklog-weekly` for missing weeks **first**, then re-run `/worklog-brag`.

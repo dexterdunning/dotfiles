@@ -12,16 +12,12 @@ echo "🔗 Stowing all dotfile configurations..."
 echo "Working directory: $(pwd)"
 echo
 
-# Get all directories (excluding hidden ones like .git)
-PACKAGES=$(find . -maxdepth 1 -type d ! -name ".*" ! -name "." | sed 's|./||' | sort)
-
-if [ -z "$PACKAGES" ]; then
-    echo "❌ No packages found to stow!"
-    exit 1
-fi
+# Agent settings and skills are composed by setup-agents.py, not stowed.
+PACKAGES=(alacritty i3 nvim polybar tmux tmuxinator zsh)
+TARGET="${DOTFILES_TARGET:-$HOME}"
 
 echo "Found packages to stow:"
-for package in $PACKAGES; do
+for package in "${PACKAGES[@]}"; do
     echo "  - $package"
 done
 echo
@@ -31,20 +27,20 @@ success_count=0
 error_count=0
 errors=()
 
-for package in $PACKAGES; do
+for package in "${PACKAGES[@]}"; do
     echo -n "Stowing $package... "
     
-    if stow "$package" 2>/dev/null; then
+    if stow --target="$TARGET" "$package" 2>/dev/null; then
         echo "✅ Success"
-        ((success_count++))
+        ((++success_count))
     else
         echo "❌ Failed"
-        ((error_count++))
+        ((++error_count))
         errors+=("$package")
         
         # Show the error details
         echo "  Error details:"
-        stow "$package" 2>&1 | sed 's/^/    /'
+        stow --target="$TARGET" "$package" 2>&1 | sed 's/^/    /'
         echo
     fi
 done
@@ -69,3 +65,5 @@ fi
 
 echo
 echo "🎉 Stowing complete!"
+echo "Agent setup: python3 setup-agents.py [--private /path/to/private-sources] [--omp-profile NAME] --apply"
+((error_count == 0))

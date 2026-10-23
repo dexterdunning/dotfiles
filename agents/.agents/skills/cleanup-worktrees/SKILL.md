@@ -1,10 +1,10 @@
 ---
 name: cleanup-worktrees
-description: Remove worktrees that no longer have open PRs and clean up git-spice state
+description: Safely remove worktrees and local branches after verifying their PR and native GitHub stack state
 allowed-tools: Bash(*), Read(*)
 ---
 
-Clean up git worktrees whose branches no longer have open PRs, sync git-spice, and delete stale local branches (including branches in the main worktree that have no worktree attached).
+Clean up git worktrees and stale local branches without mutating unrelated native GitHub stacks. Never use stack sync/rebase as a read-only cleanup step.
 
 ## Instructions
 
@@ -32,49 +32,50 @@ Loop over all candidates in a single bash call to minimize overhead.
 
 ### Step 3: Present a combined findings table
 
-Present ONE unified table covering both worktrees and loose local branches. Columns: Kind (worktree / branch), Path-or-name, Branch, PR status (OPEN #N / MERGED #N / CLOSED #N / No PR), Recommendation (Keep / Remove).
+Present ONE unified table covering worktrees and loose local branches. Columns:
+Kind, Path-or-name, Branch, PR status, Unique local commits, Active work, Recommendation.
 
-- **Keep**: OPEN PR
-- **Remove**: No PR, MERGED, or CLOSED
-- **Remove**: detached HEAD worktrees (Cursor artifacts, etc.)
+- **Keep**: OPEN PR or active work
+- **Remove**: MERGED, only after verifying no active work and no unique local commits
+- **Review**: No PR or CLOSED; closed-unmerged branches may contain unique work
+- **Review**: detached HEAD worktrees; verify they are disposable before removal
 
-Ask the user to confirm before removing anything. A single confirmation covers both worktrees and loose branches.
+Ask the user to confirm before removing anything. Explicitly call out every branch
+that needs force deletion or has unique commits.
 
 ### Step 4: Remove confirmed worktrees
 
 ```bash
-git worktree remove --force <path>
+git worktree remove <path>
 ```
 
-If `git worktree remove` hangs or fails on Cursor/IDE-managed worktrees, fall back to:
+Use `--force` or direct filesystem removal only after explicit confirmation that the
+worktree has no active or unique work. If an IDE-managed worktree cannot be removed:
 
 ```bash
 rm -rf <path>
 ```
 
-Then run `git worktree prune` once at the end to clean up stale references.
+Then run `git worktree prune` once to clean stale references.
 
-### Step 5: Sync git-spice
-
-`gs repo sync` pulls latest and auto-deletes merged tracked branches:
+### Step 5: Refresh remote refs without mutating stacks
 
 ```bash
-gs repo sync --no-prompt
+git fetch --prune origin
 ```
 
-### Step 6: Delete remaining stale local branches
+Do not blindly run `gh stack sync` or `gh stack rebase`: both can rewrite/push active
+branches, and `gh stack sync --prune` can delete merged local branches. Inspect with
+`gh stack view --short` / `--json` only when stack context is needed.
 
-Delete the loose local branches flagged in Step 3 that still exist after `gs repo sync`:
+### Step 6: Delete confirmed stale local branches
 
 ```bash
-gs branch delete --no-prompt --force <branch-name>  # preferred; falls back to git if untracked
+git branch -d <branch-name>
 ```
 
-`gs branch delete` handles both tracked and untracked branches. If it fails, fall back to:
-
-```bash
-git branch -D <branch-name>
-```
+If `-d` refuses because commits are unique, stop and ask. Use `git branch -D` only
+after the user explicitly authorizes discarding those commits. Never quietly merge them.
 
 ### Step 7: Show final state
 
