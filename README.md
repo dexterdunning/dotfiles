@@ -42,6 +42,8 @@ Install the packages listed in Pi's generated settings using your Pi version's p
 
 `open-in-nvim` requires macOS, Warp, and Neovim. `pi-vimmode.config.js` is optional configuration for the separate `pi-vimmode` package; it does not install that package. The installer does not install packages, patch dependencies, fetch gateways, or migrate authentication.
 
+`omp/extensions/vim-jj.ts` maps `jj` within 300 ms to exit OMP's Vim insert mode. A lone `j` appears immediately; pasted text and normal-mode movement are unchanged. The installer symlinks this user-owned extension into the selected profile, outside Homebrew and managed plugin installations.
+
 ### Sources and generated files
 
 | Public source | Optional private source | Live destination |
